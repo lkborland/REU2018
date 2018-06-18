@@ -17,7 +17,7 @@ t1 <- trial1[!duplicated(trial1[c("TagCode","DateTime")]), ]
 dttrial1 <- as.POSIXct(t1$DateTime)
 
 
-#create object of class ltraj
+#create object of class ltraj with info about locations (Period, Period2, Species, Trial)
 carp1 <- as.ltraj(xy = t1[,c("Easting","Northing")], date = dttrial1,
                   id = t1$TagCode, typeII = TRUE,
                   infolocs = t1[,7:10])
