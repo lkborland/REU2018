@@ -47,14 +47,13 @@ ggplot() +
 #set theme for animation to plain black and white
 theme_set(theme_bw())
 
-#create variable for fish1 trial1, first 500 observations
+#create variable for fish1 trial1
 fish1.1 <- trial1 %>% 
   filter(TagCode == 2059.535)
 
 #set boxes Period and Time = NA so they work in the ggplot
 boxes$Period = NA
 boxes$Time = NA
-
 
 #create plot with ggplot, geom_point for telemetry data and geom_segment for pool location
 p <- ggplot(data = fish1.1[1:500,]) + 
@@ -76,9 +75,27 @@ library(RColorBrewer)
 head(boxes)
 boxes$Period = NA
 boxes$Time = NA
-p3 <- ggplot(data = fish1.1) + 
+p1.1 <- ggplot(data = fish1.1) + 
   geom_point(aes(Easting, Northing, color = Period2), alpha = 0.7) + 
   scale_color_manual(values=c("palegreen1", "palegreen2", "palegreen3",  "seagreen4", "palegreen4"), guide=FALSE) +
   geom_segment(data=boxes, aes(x=Easting, y=Northing, xend = Easting + delta_long, yend = Northing + delta_lat)) +
   facet_wrap(~ Period2, ncol=5)
-p3
+p1.1
+
+
+#create variable for fish2 trial1
+fish1.2 <- trial1 %>% 
+  filter(TagCode == 2325.423)
+
+#make correct order of periods
+fish1.2 <- fish1.2 %>%
+  mutate(Period2 = factor(Period2, levels=order1.1)) %>%
+  arrange()
+
+#separate points by period for fish 2 trial 1
+p1.2 <- ggplot(data = fish1.2) + 
+  geom_point(aes(Easting, Northing, color = Period2), alpha = 0.7) + 
+  scale_color_manual(values=c("palegreen1", "palegreen2", "palegreen3",  "seagreen4", "palegreen4"), guide=FALSE) +
+  geom_segment(data=boxes, aes(x=Easting, y=Northing, xend = Easting + delta_long, yend = Northing + delta_lat)) +
+  facet_wrap(~ Period2, ncol=5)
+p1.2
