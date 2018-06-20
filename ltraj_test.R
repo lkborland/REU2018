@@ -105,8 +105,18 @@ carp1mvmt <- ggplot(carp1bp, aes(x = Period, y = dt, fill = Period)) +
     strip.background = element_blank()
   ) 
 
-#create boxplot displaying relative angle 
-
+#create boxplot displaying relative angle (absolute values)
+carp1ARA <- mutate(carp1df, absrelang = abs(rel.angle))
+carp1ang <- ggplot(carp1ARA, aes(x = Period, y = absrelang, fill = Period)) + 
+  geom_boxplot() +
+  scale_fill_manual("Period", values = c("sienna1", "sienna3", "sienna4")) +
+  theme_bw() +
+  ylab("Absolute Value of Relative Angle") +
+  xlab("Period of CO2 Treatment") +
+  ggtitle("Relative Angle Movement by Period\nTrial One") +
+  theme(
+    strip.background = element_blank()
+  ) 
 
 
 #null model (multiple)
