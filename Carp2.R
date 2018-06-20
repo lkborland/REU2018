@@ -77,7 +77,7 @@ boxes$Period = NA
 boxes$Time = NA
 p1.1 <- ggplot(data = fish1.1) + 
   geom_point(aes(Easting, Northing, color = Period2), alpha = 0.7) + 
-  scale_color_manual(values=c("palegreen1", "palegreen2", "palegreen3",  "seagreen4", "palegreen4"), guide=FALSE) +
+  scale_color_manual(values=c("sienna1", "sienna2", "sienna3",  "sienna4", "saddlebrown"), guide=FALSE) +
   geom_segment(data=boxes, aes(x=Easting, y=Northing, xend = Easting + delta_long, yend = Northing + delta_lat)) +
   facet_wrap(~ Period2, ncol=5)
 p1.1
@@ -99,3 +99,5 @@ p1.2 <- ggplot(data = fish1.2) +
   geom_segment(data=boxes, aes(x=Easting, y=Northing, xend = Easting + delta_long, yend = Northing + delta_lat)) +
   facet_wrap(~ Period2, ncol=5)
 p1.2
+
+
