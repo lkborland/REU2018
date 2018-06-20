@@ -105,7 +105,8 @@ carp1mvmt <- ggplot(carp1bp, aes(x = Period, y = dt, fill = Period)) +
     strip.background = element_blank()
   ) 
 
-#create boxplot displaying relative angle (absolute values)
+#create boxplot displaying relative angle (absolute values) trial 1
+#make new variable for absolute value of relative angle
 carp1ARA <- mutate(carp1df, absrelang = abs(rel.angle))
 carp1ang <- ggplot(carp1ARA, aes(x = Period, y = absrelang, fill = Period)) + 
   geom_boxplot() +
@@ -117,6 +118,31 @@ carp1ang <- ggplot(carp1ARA, aes(x = Period, y = absrelang, fill = Period)) +
   theme(
     strip.background = element_blank()
   ) 
+
+#create boxplot for acceleration, trial 1
+#first make variable for acceleration, reduce to accelerations <= 0.5
+carp1acc <- mutate(carp1df, acc = dist/((dt)^2)) %>% filter(acc <= 0.3)
+carp1accplot <- ggplot(carp1acc, aes(x = Period, y = acc, fill = Period)) + 
+  geom_boxplot() +
+  scale_fill_manual("Period", values = c("sienna1", "sienna3", "sienna4")) +
+  theme_bw() +
+  ylab("Relocation Acceleration") +
+  xlab("Period of CO2 Treatment") +
+  ggtitle("Acceleration of a Movement by Period\nTrial One") +
+  theme(
+    strip.background = element_blank()
+  ) 
+
+
+#create cumulative distance plot trial 1 fish 1
+carp1cdist <- ggplot(carp1.1, aes(x = date, y = cumsum(dist), color = Period)) + 
+     geom_line(aes(size = Period)) +
+     scale_color_manual("Period", values = c("sienna1", "sienna3", "sienna4"))+
+     scale_size_manual("Period", values = c(2,3,4))+
+     theme_bw() +
+     ylab("Cumulative Distance") +
+     xlab("Time") +
+     ggtitle("Cumulative Distance Traveled Over Time\nTrial One, Fish 1")
 
 
 #null model (multiple)
