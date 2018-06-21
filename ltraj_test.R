@@ -92,18 +92,20 @@ carp1.1mvmt <- ggplot(carp1.1, aes(x = Period, y = dt, fill = Period)) +
   theme(
     strip.background = element_blank()
   ) 
-#for all fish in trial 1, filter by segments shorter than 25
-carp1bp <- filter(carp1df, dt <= 25)
-carp1mvmt <- ggplot(carp1bp, aes(x = Period, y = dt, fill = Period)) + 
+#for all fish in trial 1
+#carp1bp <- filter(carp1df, dt <= 25)
+carp1mvmt <- ggplot(carp1df, aes(x = Period, y = dt, fill = Period)) + 
   geom_boxplot() +
   scale_fill_manual("Period", values = c("sienna1", "sienna3", "sienna4")) +
   theme_bw() +
-  ylab("Movement Segment Distance") +
-  xlab("Period of CO2 Treatment") +
+  ylab(expression("Log"[10]*" Movement Segment Distance")) +
+  xlab(expression("Period of CO"[2]*" Treatment")) +
   ggtitle("Distance of Segment Movement by Period\nTrial One") +
   theme(
     strip.background = element_blank()
   ) 
+#scale on log10
+carp1mvmt + scale_y_log10()
 
 #create boxplot displaying relative angle (absolute values) trial 1
 #make new variable for absolute value of relative angle
@@ -113,21 +115,21 @@ carp1ang <- ggplot(carp1ARA, aes(x = Period, y = absrelang, fill = Period)) +
   scale_fill_manual("Period", values = c("sienna1", "sienna3", "sienna4")) +
   theme_bw() +
   ylab("Absolute Value of Relative Angle") +
-  xlab("Period of CO2 Treatment") +
+  xlab(expression("Period of CO"[2]*" Treatment")) +
   ggtitle("Relative Angle Movement by Period\nTrial One") +
   theme(
     strip.background = element_blank()
   ) 
 
 #create boxplot for acceleration, trial 1
-#first make variable for acceleration, reduce to accelerations <= 0.5
-carp1acc <- mutate(carp1df, acc = dist/((dt)^2)) %>% filter(acc <= 0.3)
+#first make variable for acceleration, reduce to accelerations
+carp1acc <- mutate(carp1df, acc = dist/((dt)^2))
 carp1accplot <- ggplot(carp1acc, aes(x = Period, y = acc, fill = Period)) + 
   geom_boxplot() +
   scale_fill_manual("Period", values = c("sienna1", "sienna3", "sienna4")) +
   theme_bw() +
   ylab("Relocation Acceleration") +
-  xlab("Period of CO2 Treatment") +
+  xlab(expression("Period of CO"[2]*" Treatment")) +
   ggtitle("Acceleration of a Movement by Period\nTrial One") +
   theme(
     strip.background = element_blank()
@@ -138,11 +140,11 @@ carp1accplot <- ggplot(carp1acc, aes(x = Period, y = acc, fill = Period)) +
 carp1cdist <- ggplot(carp1.1, aes(x = date, y = cumsum(dist), color = Period)) + 
      geom_line(aes(size = Period)) +
      scale_color_manual("Period", values = c("sienna1", "sienna3", "sienna4"))+
-     scale_size_manual("Period", values = c(2,3,4))+
+     scale_size_manual("Period", values = c(2.5,2.5,2.5))+
      theme_bw() +
      ylab("Cumulative Distance") +
      xlab("Time") +
-     ggtitle("Cumulative Distance Traveled Over Time\nTrial One, Fish 1")
+     ggtitle("Cumulative Distance Traveled Over Time\nTrial One, Fish One")
 
 
 #null model (multiple)
