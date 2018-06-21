@@ -93,7 +93,6 @@ carp1.1mvmt <- ggplot(carp1.1, aes(x = Period, y = dt, fill = Period)) +
     strip.background = element_blank()
   ) 
 #for all fish in trial 1
-#carp1bp <- filter(carp1df, dt <= 25)
 carp1mvmt <- ggplot(carp1df, aes(x = Period, y = dt, fill = Period)) + 
   geom_boxplot() +
   scale_fill_manual("Period", values = c("sienna1", "sienna3", "sienna4")) +
@@ -106,6 +105,11 @@ carp1mvmt <- ggplot(carp1df, aes(x = Period, y = dt, fill = Period)) +
   ) 
 #scale on log10
 carp1mvmt + scale_y_log10()
+#testing differences
+mod.mvmt <- lm(dist ~ Period, data=carp1df)
+summary(mod.mvmt)
+anova(mod.mvmt)
+
 
 #create boxplot displaying relative angle (absolute values) trial 1
 #make new variable for absolute value of relative angle
@@ -120,6 +124,10 @@ carp1ang <- ggplot(carp1ARA, aes(x = Period, y = absrelang, fill = Period)) +
   theme(
     strip.background = element_blank()
   ) 
+#testing differences
+mod.ARA <- lm(absrelang ~ Period, data=carp1ARA)
+summary(mod.ARA)
+
 
 #create boxplot for acceleration, trial 1
 #first make variable for acceleration, reduce to accelerations
@@ -134,23 +142,26 @@ carp1accplot <- ggplot(carp1acc, aes(x = Period, y = acc, fill = Period)) +
   theme(
     strip.background = element_blank()
   ) 
+#testing differences
+mod.acc <- lm(acc ~ Period, data=carp1acc)
+summary(mod.acc)
+
 
 
 #create cumulative distance plot trial 1 fish 1
 carp1cdist <- ggplot(carp1.1, aes(x = date, y = cumsum(dist), color = Period)) + 
-     geom_line(aes(size = Period)) +
-     scale_color_manual("Period", values = c("sienna1", "sienna3", "sienna4"))+
-     scale_size_manual("Period", values = c(2.5,2.5,2.5))+
-     theme_bw() +
-     ylab("Cumulative Distance") +
-     xlab("Time") +
-     ggtitle("Cumulative Distance Traveled Over Time\nTrial One, Fish One")
+  geom_line(aes(size = Period)) +
+  scale_color_manual("Period", values = c("sienna1", "sienna3", "sienna4"))+
+  scale_size_manual("Period", values = c(2.5,2.5,2.5))+
+  theme_bw() +
+  ylab("Cumulative Distance") +
+  xlab("Time") +
+  ggtitle("Cumulative Distance Traveled Over Time\nTrial One, Fish One")
 
 
 #null model (multiple)
 #define a function to plot randomized trajectory over study area (outdoor pool)
 #carp1nmm <- NMs.CRW(N=10, nlocs=50000, nrep=1)
-
 
 
 #correlogram: needs regular data
