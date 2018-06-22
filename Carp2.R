@@ -125,6 +125,9 @@ plot(carp1.1pca$scores[,1], carp1.1pca$scores[,2], ylim=range(carp1.1pca$scores[
 
 #k-means clustering (3 clusters)
 carp1scaled <- scale(na.omit(carp1df[, -c(3,7,11:15)]))
-carp1.k3 <- kmeans(carp1scaled, centers=3)
+carp1.k3 <- kmeans(carp1scaled, centers=2, iter.max = 200, nstart = 25)
 #print clusters by showing Period of a movement
-carp1.k3.clust <- lapply(1:3, function(nc) carp1df$Period[carp1.k3$cluster==nc])
+carp1.k3.clust <- lapply(1:2, function(nc) carp1df$Period[carp1.k3$cluster==nc])
+summary(carp1.k3.clust[[1]])
+summary(carp1.k3.clust[[2]])
+#summary(carp1.k3.clust[[3]])
