@@ -101,3 +101,30 @@ p1.2 <- ggplot(data = fish1.2) +
 p1.2
 
 
+#PCA, exclude time, change in time, and categorical variables
+carp1.pca <- princomp(~., data=carp1df[,-c(3,7,11:15)], na.action = na.omit)
+summary(carp1.pca, loadings=T)
+#check the eigenvalues in a scree plot; shows we should use 2 components
+plot(1:(length(carp1.pca$sdev)),  (carp1.pca$sdev)^2, type='b', 
+     main="Scree Plot", xlab="Number of Components", ylab="Eigenvalue Size")
+#plotting the pca scores against each other
+plot(carp1.pca$scores[,1], carp1.pca$scores[,2], ylim=range(carp1.pca$scores[,1]), 
+     xlab="PC 1", ylab="PC 2", type ='p', lwd=2, col=carp1df$Period)
+
+
+#PCA, exclude time, change in time, and categorical variables
+carp1.1pca <- princomp(~., data=carp1.1[,-c(3,7,11:15)], na.action = na.omit)
+summary(carp1.1pca, loadings=T)
+#check the eigenvalues in a scree plot; shows we should use 2 components
+plot(1:(length(carp1.1pca$sdev)),  (carp1.1pca$sdev)^2, type='b', 
+     main="Scree Plot", xlab="Number of Components", ylab="Eigenvalue Size")
+#plotting the pca scores against each other
+plot(carp1.1pca$scores[,1], carp1.1pca$scores[,2], ylim=range(carp1.1pca$scores[,1]), 
+     xlab="PC 1", ylab="PC 2", type ='p', lwd=2, col=carp1.1$Period)
+
+
+#k-means clustering (3 clusters)
+carp1scaled <- scale(na.omit(carp1df[, -c(3,7,11:15)]))
+carp1.k3 <- kmeans(carp1scaled, centers=3)
+#print clusters by showing Period of a movement
+carp1.k3.clust <- lapply(1:3, function(nc) carp1df$Period[carp1.k3$cluster==nc])
