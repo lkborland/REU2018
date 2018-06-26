@@ -84,10 +84,22 @@ carp1.1Post <- filter(carp1.1, Period == "PostCO2")
 
 #filter out bad rows
 carp1dirty <- carp1df
-badrows <- (which(carp1df$dt >= 5))
+badrows <- (which(carp1df$dt > 5))
 carp1df[carp1df$badrows+1,"rel.angle"] <- NA
 carp1c <- carp1df[-badrows,]
 
+
+
+barrier <- c(2.25, 3.1)
+carp1c$zone <- ifelse(carp1c$x < barrier[1] & carp1c$y > barrier[2], "High", "Low")
+table(carp1c$zone[-1],carp1c$zone[-length(carp1c$zone)]) / length(carp1c$zone)
+
+#making boxes in pool
+easting.width <- 4.9
+northing.width <- 10
+easting.zones <- 4
+northing.zones <- 8
+easting.boundaries <- sort(c(barrier[1], easting.width/seq(1:easting.zones)))
 
 #create boxplot displaying movement segment distance
 #for fish 1 trial 1
