@@ -81,6 +81,13 @@ carp1.1Pre <- filter(carp1.1, Period == "PreCO2")
 carp1.1During <- filter(carp1.1, Period == "DuringCO2")
 carp1.1Post <- filter(carp1.1, Period == "PostCO2")
 
+
+#filter out bad rows
+badrows <- (which(carp1df$dt >= 5))
+#df1 <- (carp1df[carp1df$badrows+1,rel.angle] <- NA)
+#carp1c <- df1[-badrows,]
+
+
 #create boxplot displaying movement segment distance
 #for fish 1 trial 1
 carp1.1mvmt <- ggplot(carp1.1, aes(x = Period, y = dt, fill = Period)) + 
@@ -157,6 +164,7 @@ carp1cdist <- ggplot(carp1.1, aes(x = date, y = cumsum(dist), color = Period)) +
   ylab("Cumulative Distance") +
   xlab("Time") +
   ggtitle("Cumulative Distance Traveled Over Time\nTrial One, Fish One")
+
 
 
 #null model (multiple)
