@@ -83,9 +83,10 @@ carp1.1Post <- filter(carp1.1, Period == "PostCO2")
 
 
 #filter out bad rows
+carp1dirty <- carp1df
 badrows <- (which(carp1df$dt >= 5))
-#df1 <- (carp1df[carp1df$badrows+1,rel.angle] <- NA)
-#carp1c <- df1[-badrows,]
+carp1df[carp1df$badrows+1,"rel.angle"] <- NA
+carp1c <- carp1df[-badrows,]
 
 
 #create boxplot displaying movement segment distance
