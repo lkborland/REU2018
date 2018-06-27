@@ -120,6 +120,7 @@ for(i in 1:leny){
   }
 }
 
+
 #create variable for exact grid the fish is in
 carp1c$x.zones <- x.zones
 carp1c$y.zones <- y.zones
@@ -135,7 +136,9 @@ carp1mchain <- function (nn, transition.matrix, start=sample(1:nrow(transition.m
   output[1] <- start
   for (mvmt in 2:nn) 
     output[mvmt] <- sample(ncol(transition.matrix), 1, prob=transition.matrix[output[mvmt-1],])
-  print(summary(output))
+  #print(table(output))
+  #print(summary(output))
+  output
 }
 #simulation with 1000 relocations for all periods
 carp1mchain(1000, carp1matrix)
@@ -148,17 +151,24 @@ carp1cPost <- carp1c %>% filter(Period == "PostCO2")
 #transition matrix for PreCO2 Period
 carp1mPre <- table(carp1cPre$grid[-1], carp1cPre$grid[-length(carp1cPre$grid)]) / length(carp1cPre$grid)
 #general Markov chain for PreCO2 period simulation
-carp1mchain(1000, carp1mPre)
+carp1mchain(200000, carp1mPre)
 
 #transition matrix for DuringCO2 Period
 carp1mDur <- table(carp1cDur$grid[-1], carp1cDur$grid[-length(carp1cDur$grid)]) / length(carp1cDur$grid)
 #general Markov chain for DuringCO2 period simulation
-carp1mchain(1000, carp1mDur)
+carp1mchain(200000, carp1mDur)
 
 #transition matrix for PostCO2 Period
 carp1mPost <- table(carp1cPost$grid[-1], carp1cPost$grid[-length(carp1cPost$grid)]) / length(carp1cPost$grid)
 #general Markov chain for PostCO2 period simulation
-carp1mchain(1000, carp1mPost)
+carp1mchain(200000, carp1mPost)
+
+
+#total time spent in each grid cell
+time_gridPre <- carp1cPre %>% group_by(grid) %>% mutate(sumtime = sum(dt))
+time_gridDur <- carp1cDur %>% group_by(grid) %>% mutate(sumtime = sum(dt))
+time_gridPost <- carp1cPost %>% group_by(grid) %>% mutate(sumtime = sum(dt))
+
 
 
 #create boxplot displaying movement segment distance
@@ -237,15 +247,3 @@ carp1cdist <- ggplot(carp1.1, aes(x = date, y = cumsum(dist), color = Period)) +
   ylab("Cumulative Distance") +
   xlab("Time") +
   ggtitle("Cumulative Distance Traveled Over Time\nTrial One, Fish One")
-
-
-
-#null model (multiple)
-#define a function to plot randomized trajectory over study area (outdoor pool)
-#carp1nmm <- NMs.CRW(N=10, nlocs=50000, nrep=1)
-
-
-#correlogram: needs regular data
-#corrgram1 <- acfdist.ltraj(carp1, which = c("dist", "dx", "dy"), nrep = 999, lag = 1,
-#              plot = TRUE, xlab = "Lag", ylab = "autocorrelation")
-#corrgram1
