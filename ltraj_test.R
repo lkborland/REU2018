@@ -24,12 +24,6 @@ carp1 <- as.ltraj(xy = t1[,c("Easting","Northing")], date = dttrial1$dt1,
                   infolocs = t1[,7:10])
 carp1
 
-#make data regular
-#date.ref1 <- as.POSIXct(c("2014-10-15 07:00:07", "2014-10-15 07:00:12", "2014-10-15 07:00:44", "2014-10-15 07:00:17", 
-#                          "2014-10-15 07:00:07", "2014-10-15 07:00:13", "2014-10-15 07:00:10", "2014-10-15 07:00:20", 
-#                          "2014-10-15 07:00:12", "2014-10-15 07:00:08"))
-#reg_c1 <- sett0(carp1, date.ref1, 3.5)
-
 
 #TRIAL 2
 t2 <- trial2[!duplicated(trial2[c("TagCode","DateTime")]), ]
@@ -89,7 +83,7 @@ carp1df[carp1df$badrows+1,"rel.angle"] <- NA
 carp1c <- carp1df[-badrows,]
 
 
-
+#show where barrier is, make high and low zones of CO2 distinction
 barrier <- c(2.25, 3.1)
 carp1c$zone <- ifelse(carp1c$x < barrier[1] & carp1c$y > barrier[2], "High", "Low")
 table(carp1c$zone[-1],carp1c$zone[-length(carp1c$zone)]) / length(carp1c$zone)
@@ -131,12 +125,11 @@ carp1c$x.zones <- x.zones
 carp1c$y.zones <- y.zones
 carp1c <- carp1c %>% mutate(grid = paste0(x.zones, y.zones))
 
-#show table of grid locations
+#transition matrix for all periods all fish, trial 1
 table(carp1c$grid[-1], carp1c$grid[-length(carp1c$grid)])
 carp1matrix <- table(carp1c$grid[-1], carp1c$grid[-length(carp1c$grid)]) / length(carp1c$grid)
 
-#general Markov chain
-library(markovchain)
+#general Markov chain for all periods
 carp1mchain <- function (nn, transition.matrix, start=sample(1:nrow(transition.matrix), 1)) {
   output <- rep (NA, nn)
   output[1] <- start
@@ -144,8 +137,29 @@ carp1mchain <- function (nn, transition.matrix, start=sample(1:nrow(transition.m
     output[mvmt] <- sample(ncol(transition.matrix), 1, prob=transition.matrix[output[mvmt-1],])
   print(summary(output))
 }
-#simulation with 1000 relocations
+#simulation with 1000 relocations for all periods
 carp1mchain(1000, carp1matrix)
+
+#divide observations by period
+carp1cPre <- carp1c %>% filter(Period == "PreCO2")
+carp1cDur <- carp1c %>% filter(Period == "DuringCO2")
+carp1cPost <- carp1c %>% filter(Period == "PostCO2")
+
+#transition matrix for PreCO2 Period
+carp1mPre <- table(carp1cPre$grid[-1], carp1cPre$grid[-length(carp1cPre$grid)]) / length(carp1cPre$grid)
+#general Markov chain for PreCO2 period simulation
+carp1mchain(1000, carp1mPre)
+
+#transition matrix for DuringCO2 Period
+carp1mDur <- table(carp1cDur$grid[-1], carp1cDur$grid[-length(carp1cDur$grid)]) / length(carp1cDur$grid)
+#general Markov chain for DuringCO2 period simulation
+carp1mchain(1000, carp1mDur)
+
+#transition matrix for PostCO2 Period
+carp1mPost <- table(carp1cPost$grid[-1], carp1cPost$grid[-length(carp1cPost$grid)]) / length(carp1cPost$grid)
+#general Markov chain for PostCO2 period simulation
+carp1mchain(1000, carp1mPost)
+
 
 #create boxplot displaying movement segment distance
 #for fish 1 trial 1
