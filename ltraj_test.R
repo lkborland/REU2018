@@ -131,6 +131,10 @@ carp1c$x.zones <- x.zones
 carp1c$y.zones <- y.zones
 carp1c <- carp1c %>% mutate(grid = paste0(x.zones, y.zones))
 
+#show table of grid locations
+table(carp1c$grid[-1], carp1c$grid[-length(carp1c$grid)])
+table(carp1c$grid[-1], carp1c$grid[-length(carp1c$grid)]) / length(carp1c$grid)
+
 #create boxplot displaying movement segment distance
 #for fish 1 trial 1
 carp1.1mvmt <- ggplot(carp1.1, aes(x = Period, y = dt, fill = Period)) + 
