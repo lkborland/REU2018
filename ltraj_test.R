@@ -99,7 +99,7 @@ easting.width <- 4.9
 northing.width <- 10
 easting.zones <- 4
 northing.zones <- 8
-easting.boundaries <- sort(c(0, barrier[1], easting.width/seq(1:easting.zones)))
+easting.boundaries <- sort(c(0, easting.width/seq(1:easting.zones)))
 northing.boundaries <- sort(c(0, northing.width/seq(1:northing.zones)))
 
 #creating zones in pool, searching for locations (x values)
@@ -133,7 +133,19 @@ carp1c <- carp1c %>% mutate(grid = paste0(x.zones, y.zones))
 
 #show table of grid locations
 table(carp1c$grid[-1], carp1c$grid[-length(carp1c$grid)])
-table(carp1c$grid[-1], carp1c$grid[-length(carp1c$grid)]) / length(carp1c$grid)
+carp1matrix <- table(carp1c$grid[-1], carp1c$grid[-length(carp1c$grid)]) / length(carp1c$grid)
+
+#general Markov chain
+library(markovchain)
+carp1mchain <- function (nn, transition.matrix, start=sample(1:nrow(transition.matrix), 1)) {
+  output <- rep (NA, nn)
+  output[1] <- start
+  for (mvmt in 2:nn) 
+    output[mvmt] <- sample(ncol(transition.matrix), 1, prob=transition.matrix[output[mvmt-1],])
+  print(summary(output))
+}
+#simulation with 1000 relocations
+carp1mchain(1000, carp1matrix)
 
 #create boxplot displaying movement segment distance
 #for fish 1 trial 1
