@@ -99,7 +99,33 @@ easting.width <- 4.9
 northing.width <- 10
 easting.zones <- 4
 northing.zones <- 8
-easting.boundaries <- sort(c(barrier[1], easting.width/seq(1:easting.zones)))
+easting.boundaries <- sort(c(0, barrier[1], easting.width/seq(1:easting.zones)))
+northing.boundaries <- sort(c(0, barrier[2], northing.width/seq(1:northing.zones)))
+
+#creating zones in pool, searching for locations (x values)
+lenx <- length(carp1c$x)
+x.zones <- NULL
+
+for(i in 1:lenx){
+  for(j in 2:length(easting.boundaries)){
+    if(carp1c$x[i] > easting.boundaries[j-1] & carp1c$x[i]<= easting.boundaries[j]) {
+      x.zones[i] <- paste("e",j-1)
+    }
+  }
+}
+
+#creating zones in pool, searching for locations (y values)
+leny <- length(carp1c$y)
+y.zones <- NULL
+
+for(i in 1:leny){
+  for(j in 2:length(northing.boundaries)){
+    if(carp1c$y[i] > northing.boundaries[j-1] & carp1c$y[i]<= northing.boundaries[j]) {
+      y.zones[i] <- paste("n",j-1)
+    }
+  }
+}
+
 
 #create boxplot displaying movement segment distance
 #for fish 1 trial 1
