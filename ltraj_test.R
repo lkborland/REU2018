@@ -100,7 +100,7 @@ northing.width <- 10
 easting.zones <- 4
 northing.zones <- 8
 easting.boundaries <- sort(c(0, barrier[1], easting.width/seq(1:easting.zones)))
-northing.boundaries <- sort(c(0, barrier[2], northing.width/seq(1:northing.zones)))
+northing.boundaries <- sort(c(0, northing.width/seq(1:northing.zones)))
 
 #creating zones in pool, searching for locations (x values)
 lenx <- length(carp1c$x)
@@ -109,7 +109,7 @@ x.zones <- NULL
 for(i in 1:lenx){
   for(j in 2:length(easting.boundaries)){
     if(carp1c$x[i] > easting.boundaries[j-1] & carp1c$x[i]<= easting.boundaries[j]) {
-      x.zones[i] <- paste("e",j-1)
+      x.zones[i] <- paste0("e",j-1)
     }
   }
 }
@@ -121,11 +121,15 @@ y.zones <- NULL
 for(i in 1:leny){
   for(j in 2:length(northing.boundaries)){
     if(carp1c$y[i] > northing.boundaries[j-1] & carp1c$y[i]<= northing.boundaries[j]) {
-      y.zones[i] <- paste("n",j-1)
+      y.zones[i] <- paste0("n",j-1)
     }
   }
 }
 
+#create variable for exact grid the fish is in
+carp1c$x.zones <- x.zones
+carp1c$y.zones <- y.zones
+carp1c <- carp1c %>% mutate(grid = paste0(x.zones, y.zones))
 
 #create boxplot displaying movement segment distance
 #for fish 1 trial 1
