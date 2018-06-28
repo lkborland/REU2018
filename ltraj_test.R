@@ -93,8 +93,8 @@ easting.width <- 4.9
 northing.width <- 10
 easting.zones <- 4
 northing.zones <- 8
-easting.boundaries <- sort(c(0, easting.width/seq(1:easting.zones)))
-northing.boundaries <- sort(c(0, northing.width/seq(1:northing.zones)))
+easting.boundaries <- sort(c(0, (seq(1:easting.zones)*(easting.width/easting.zones))))
+northing.boundaries <- sort(c(0, (seq(1:northing.zones)*(northing.width/northing.zones))))
 
 #creating zones in pool, searching for locations (x values)
 lenx <- length(carp1c$x)
@@ -169,7 +169,32 @@ time_gridPre <- carp1cPre %>% group_by(grid) %>% mutate(sumtime = sum(dt))
 time_gridDur <- carp1cDur %>% group_by(grid) %>% mutate(sumtime = sum(dt))
 time_gridPost <- carp1cPost %>% group_by(grid) %>% mutate(sumtime = sum(dt))
 
-
+#make box "map" to show study pool with grid cells
+boxes <- data.frame(read.table(text = "0 0 10 0 
+                               0 0 0 4.9 
+                               10 0 0 4.9
+                               10 4.9 -10 0 
+                               10 2.25 -6.9 0
+                               10 2.5 -6.9 0
+                               3.1 2.25 0 .25
+                               4 0 0 2.25", header = F))
+gridlines <- data.frame(read.table(text = "0 1.225 10 0
+                                   0 2.45 10 0
+                                   0 3.68 10 0
+                                   1.25 0 0 4.9
+                                   2.5 0 0 4.9
+                                   3.75 0 0 4.9
+                                   5 0 0 4.9
+                                   6.25 0 0 4.9
+                                   7.5 0 0 4.9
+                                   8.75 0 0 4.9", header = F))
+gridlines <- setNames(gridlines, c("Northing", "Easting", "delta_lat", "delta_long"))
+boxes <- setNames(boxes, c("Northing", "Easting", "delta_lat", "delta_long"))
+ggplot() + 
+  theme_bw() + 
+  geom_segment(data=boxes, aes(x=Easting, y=Northing, xend = Easting + delta_long, yend = Northing + delta_lat)) + 
+  geom_segment(data=gridlines, aes(x=Easting, y=Northing, xend = Easting + delta_long, yend = Northing + delta_lat), color = "darkblue",
+               size = 1.5)
 
 #create boxplot displaying movement segment distance
 #for fish 1 trial 1
