@@ -151,17 +151,17 @@ carp1cPost <- carp1c %>% filter(Period == "PostCO2")
 #transition matrix for PreCO2 Period
 carp1mPre <- table(carp1cPre$grid[-1], carp1cPre$grid[-length(carp1cPre$grid)]) / length(carp1cPre$grid)
 #general Markov chain for PreCO2 period simulation
-carp1mchain(200000, carp1mPre)
+prechain <- carp1mchain(200000, carp1mPre)
 
 #transition matrix for DuringCO2 Period
 carp1mDur <- table(carp1cDur$grid[-1], carp1cDur$grid[-length(carp1cDur$grid)]) / length(carp1cDur$grid)
 #general Markov chain for DuringCO2 period simulation
-carp1mchain(200000, carp1mDur)
+durchain <- carp1mchain(200000, carp1mDur)
 
 #transition matrix for PostCO2 Period
 carp1mPost <- table(carp1cPost$grid[-1], carp1cPost$grid[-length(carp1cPost$grid)]) / length(carp1cPost$grid)
 #general Markov chain for PostCO2 period simulation
-carp1mchain(200000, carp1mPost)
+postchain <- carp1mchain(200000, carp1mPost)
 
 
 #total time spent in each grid cell
@@ -195,6 +195,44 @@ ggplot() +
   geom_segment(data=boxes, aes(x=Easting, y=Northing, xend = Easting + delta_long, yend = Northing + delta_lat)) + 
   geom_segment(data=gridlines, aes(x=Easting, y=Northing, xend = Easting + delta_long, yend = Northing + delta_lat), color = "darkblue",
                size = 1.5)
+
+#create density 'heatmap' for counts in each grid for a simulation by Period
+#PreCO2 period
+grid.precount <- table(prechain)
+raster.gridpre <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.gridpre$w <- easting.width/easting.zones
+raster.gridpre$z <-  factor(grid.precount)
+raster.gridpre <- data.frame(raster.gridpre)
+cc <- scales::seq_gradient_pal("lightblue", "navyblue", "Lab")(seq(0,1,length.out=32))
+boxes$z = NA
+ggplot(raster.gridpre, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Simualated Relocations\nPreCO2")
+#DuringCO2 period
+grid.durcount <- table(durchain)
+raster.griddur <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.griddur$w <- easting.width/easting.zones
+raster.griddur$z <-  factor(grid.durcount)
+raster.griddur <- data.frame(raster.griddur)
+ggplot(raster.griddur, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Simualated Relocations\nDuring CO2")
+#Post CO2 Period
+grid.postcount <- table(postchain)
+raster.gridpost <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.gridpost$w <- easting.width/easting.zones
+raster.gridpost$z <-  factor(grid.postcount)
+raster.gridpost <- data.frame(raster.gridpost)
+ggplot(raster.gridpost, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Simualated Relocations\nPost CO2")
+
 
 #create boxplot displaying movement segment distance
 #for fish 1 trial 1
