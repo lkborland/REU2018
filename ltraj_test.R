@@ -196,10 +196,17 @@ carp1mPost2 <- table(carp1cPost2$grid[-1], carp1cPost2$grid[-length(carp1cPost2$
 #general Markov chain for PostCO2 period simulation
 post2chain <- carp1mchain(200000, carp1mPost2)
 
-#total time spent in each grid cell
+#total time spent in each grid cell by period
 time_gridPre <- carp1cPre %>% group_by(grid) %>% mutate(sumtime = sum(dt))
 time_gridDur <- carp1cDur %>% group_by(grid) %>% mutate(sumtime = sum(dt))
 time_gridPost <- carp1cPost %>% group_by(grid) %>% mutate(sumtime = sum(dt))
+
+#total time spent in each grid cell by Period2
+time_gridPre2 <- carp1cPre2 %>% group_by(grid) %>% mutate(sumtime = sum(dt))
+time_gridInc2 <- carp1cInc2 %>% group_by(grid) %>% mutate(sumtime = sum(dt))
+time_gridDur2 <- carp1cDur2 %>% group_by(grid) %>% mutate(sumtime = sum(dt))
+time_gridDec2 <- carp1cDec2 %>% group_by(grid) %>% mutate(sumtime = sum(dt))
+time_gridPost2 <- carp1cPost2 %>% group_by(grid) %>% mutate(sumtime = sum(dt))
 
 #make box "map" to show study pool with grid cells
 boxes <- data.frame(read.table(text = "0 0 10 0 
@@ -357,6 +364,64 @@ ggplot(raster.gridpostt, aes(x=x, y=y, fill = z)) +
   theme_bw() + 
   xlab("Easting") + ylab("Northing") + 
   ggtitle("Density of Time Spent\nPost CO2")
+
+#create density 'heatmap' for total amount of time in each grid by Period2 (OG data)
+#Pre2
+grid.pre2time <- time_gridPre2 %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
+raster.gridpre2t <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.gridpre2t$w <- easting.width/easting.zones
+raster.gridpre2t$z <-  factor(grid.pre2time$sumtime)
+raster.gridpre2t <- data.frame(raster.gridpre2t)
+ggplot(raster.gridpre2t, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Time Spent\nPre CO2")
+#Inc2
+grid.inc2time <- time_gridInc2 %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
+raster.gridinc2t <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.gridinc2t$w <- easting.width/easting.zones
+raster.gridinc2t$z <-  factor(grid.inc2time$sumtime)
+raster.gridinc2t <- data.frame(raster.gridinc2t)
+ggplot(raster.gridinc2t, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Time Spent\nIncreasing CO2")
+#Dur2
+grid.dur2time <- time_gridDur2 %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
+raster.griddur2t <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.griddur2t$w <- easting.width/easting.zones
+raster.griddur2t$z <-  factor(grid.dur2time$sumtime)
+raster.griddur2t <- data.frame(raster.griddur2t)
+ggplot(raster.griddur2t, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Time Spent\nDuring CO2")
+#Dec2
+grid.dec2time <- time_gridDec2 %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
+raster.griddec2t <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.griddec2t$w <- easting.width/easting.zones
+raster.griddec2t$z <-  factor(grid.dec2time$sumtime)
+raster.griddec2t <- data.frame(raster.griddec2t)
+ggplot(raster.griddec2t, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Time Spent\nDecreasing CO2")
+#Post2
+grid.post2time <- time_gridPost2 %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
+raster.gridpost2t <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.gridpost2t$w <- easting.width/easting.zones
+raster.gridpost2t$z <-  factor(grid.post2time$sumtime)
+raster.gridpost2t <- data.frame(raster.gridpost2t)
+ggplot(raster.gridpost2t, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Time Spent\nPost CO2")
+
 
 #create boxplot displaying movement segment distance
 #for fish 1 trial 1
