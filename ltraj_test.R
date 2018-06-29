@@ -245,7 +245,7 @@ raster.gridpre <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones
 raster.gridpre$w <- easting.width/easting.zones
 raster.gridpre$z <-  factor(grid.precount)
 raster.gridpre <- data.frame(raster.gridpre)
-cc <- scales::seq_gradient_pal("lightblue", "navyblue", "Lab")(seq(0,1,length.out=easting.zones*northing.zones))
+cc <- scales::seq_gradient_pal("#E0F3DB", "#084081", "Lab")(seq(0,1,length.out=easting.zones*northing.zones))
 boxes$z = NA
 ggplot(raster.gridpre, aes(x=x, y=y, fill = z)) + 
   geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
