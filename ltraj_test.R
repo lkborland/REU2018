@@ -233,6 +233,40 @@ ggplot(raster.gridpost, aes(x=x, y=y, fill = z)) +
   xlab("Easting") + ylab("Northing") + 
   ggtitle("Density of Simualated Relocations\nPost CO2")
 
+#create density 'heatmap' for total amount of time in each grid by Period (OG data)
+#Pre
+grid.pretime <- time_gridPre %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
+raster.gridpret <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.gridpret$w <- easting.width/easting.zones
+raster.gridpret$z <-  factor(grid.pretime$sumtime)
+raster.gridpret <- data.frame(raster.gridpret)
+ggplot(raster.gridpret, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Time Spent\nPre CO2")
+#During
+grid.durtime <- time_gridDur %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
+raster.griddurt <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.griddurt$w <- easting.width/easting.zones
+raster.griddurt$z <-  factor(grid.durtime$sumtime)
+raster.griddurt <- data.frame(raster.griddurt)
+ggplot(raster.griddurt, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Time Spent\nDuring CO2")
+#Post
+grid.posttime <- time_gridPost %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
+raster.gridpostt <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.gridpostt$w <- easting.width/easting.zones
+raster.gridpostt$z <-  factor(grid.posttime$sumtime)
+raster.gridpostt <- data.frame(raster.gridpostt)
+ggplot(raster.gridpostt, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Time Spent\nPost CO2")
 
 #create boxplot displaying movement segment distance
 #for fish 1 trial 1
