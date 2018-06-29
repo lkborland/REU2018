@@ -164,6 +164,38 @@ carp1mPost <- table(carp1cPost$grid[-1], carp1cPost$grid[-length(carp1cPost$grid
 postchain <- carp1mchain(200000, carp1mPost)
 
 
+#divide observations by period2 (pre, inc, dur, dec, post)
+carp1cPre2 <- carp1c %>% filter(Period2 == "PreCO2")
+carp1cInc2 <- carp1c %>% filter(Period2 == "IncreasingCO2")
+carp1cDur2 <- carp1c %>% filter(Period2 == "DuringCO2")
+carp1cDec2 <- carp1c %>% filter(Period2 == "DecreasingCO2")
+carp1cPost2 <- carp1c %>% filter(Period2 == "PostCO2")
+
+#transition matrix for PreCO2 Period
+carp1mPre2 <- table(carp1cPre2$grid[-1], carp1cPre2$grid[-length(carp1cPre2$grid)]) / length(carp1cPre2$grid)
+#general Markov chain for PreCO2 period simulation
+pre2chain <- carp1mchain(200000, carp1mPre2)
+
+#transition matrix for incCO2 Period
+carp1mInc2 <- table(carp1cInc2$grid[-1], carp1cInc2$grid[-length(carp1cInc2$grid)]) / length(carp1cInc2$grid)
+#general Markov chain for PreCO2 period simulation
+inc2chain <- carp1mchain(200000, carp1mInc2)
+
+#transition matrix for DuringCO2 Period
+carp1mDur2 <- table(carp1cDur2$grid[-1], carp1cDur2$grid[-length(carp1cDur2$grid)]) / length(carp1cDur2$grid)
+#general Markov chain for DuringCO2 period simulation
+dur2chain <- carp1mchain(200000, carp1mDur2)
+
+#transition matrix for PreCO2 Period
+carp1mDec2 <- table(carp1cDec2$grid[-1], carp1cDec2$grid[-length(carp1cDec2$grid)]) / length(carp1cDec2$grid)
+#general Markov chain for PreCO2 period simulation
+dec2chain <- carp1mchain(200000, carp1mDec2)
+
+#transition matrix for PostCO2 Period
+carp1mPost2 <- table(carp1cPost2$grid[-1], carp1cPost2$grid[-length(carp1cPost2$grid)]) / length(carp1cPost2$grid)
+#general Markov chain for PostCO2 period simulation
+post2chain <- carp1mchain(200000, carp1mPost2)
+
 #total time spent in each grid cell
 time_gridPre <- carp1cPre %>% group_by(grid) %>% mutate(sumtime = sum(dt))
 time_gridDur <- carp1cDur %>% group_by(grid) %>% mutate(sumtime = sum(dt))
@@ -228,6 +260,64 @@ raster.gridpost$w <- easting.width/easting.zones
 raster.gridpost$z <-  factor(grid.postcount)
 raster.gridpost <- data.frame(raster.gridpost)
 ggplot(raster.gridpost, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Simualated Relocations\nPost CO2")
+
+
+#create density 'heatmap' for counts in each grid for a simulation by Period2
+#Pre CO2 Period2
+grid.pre2count <- table(pre2chain)
+raster.gridpre2 <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.gridpre2$w <- easting.width/easting.zones
+raster.gridpre2$z <-  factor(grid.pre2count)
+raster.gridpre2 <- data.frame(raster.gridpre2)
+ggplot(raster.gridpre2, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Simualated Relocations\nPre CO2")
+#Inc CO2 Period2
+grid.inc2count <- table(inc2chain)
+raster.gridinc2 <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.gridinc2$w <- easting.width/easting.zones
+raster.gridinc2$z <-  factor(grid.inc2count)
+raster.gridinc2 <- data.frame(raster.gridinc2)
+ggplot(raster.gridinc2, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Simualated Relocations\nIncreasing CO2")
+#Dur CO2 Period2
+grid.dur2count <- table(dur2chain)
+raster.griddur2 <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.griddur2$w <- easting.width/easting.zones
+raster.griddur2$z <-  factor(grid.dur2count)
+raster.griddur2 <- data.frame(raster.griddur2)
+ggplot(raster.griddur2, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Simualated Relocations\nDuring CO2")
+#Dec CO2 Period2
+grid.dec2count <- table(dec2chain)
+raster.griddec2 <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.griddec2$w <- easting.width/easting.zones
+raster.griddec2$z <-  factor(grid.dec2count)
+raster.griddec2 <- data.frame(raster.griddec2)
+ggplot(raster.griddec2, aes(x=x, y=y, fill = z)) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  theme_bw() + 
+  xlab("Easting") + ylab("Northing") + 
+  ggtitle("Density of Simualated Relocations\nDecreasing CO2")
+#Post CO2 Period2
+grid.post2count <- table(post2chain)
+raster.gridpost2 <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+raster.gridpost2$w <- easting.width/easting.zones
+raster.gridpost2$z <-  factor(grid.post2count)
+raster.gridpost2 <- data.frame(raster.gridpost2)
+ggplot(raster.gridpost2, aes(x=x, y=y, fill = z)) + 
   geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
   theme_bw() + 
   xlab("Easting") + ylab("Northing") + 
