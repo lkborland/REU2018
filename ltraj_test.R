@@ -91,8 +91,8 @@ table(carp1c$zone[-1],carp1c$zone[-length(carp1c$zone)]) / length(carp1c$zone)
 #making boxes in pool
 easting.width <- 4.9
 northing.width <- 10
-easting.zones <- 4
-northing.zones <- 8
+easting.zones <- 10
+northing.zones <- 20
 easting.boundaries <- sort(c(0, (seq(1:easting.zones)*(easting.width/easting.zones))))
 northing.boundaries <- sort(c(0, (seq(1:northing.zones)*(northing.width/northing.zones))))
 
@@ -122,6 +122,9 @@ for(i in 1:leny){
 
 
 #create variable for exact grid the fish is in
+carp1c$x.zones <- NULL
+carp1c$y.zones <- NULL
+
 carp1c$x.zones <- x.zones
 carp1c$y.zones <- y.zones
 carp1c <- carp1c %>% mutate(grid = paste0(x.zones, y.zones))
@@ -242,10 +245,10 @@ raster.gridpre <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones
 raster.gridpre$w <- easting.width/easting.zones
 raster.gridpre$z <-  factor(grid.precount)
 raster.gridpre <- data.frame(raster.gridpre)
-cc <- scales::seq_gradient_pal("lightblue", "navyblue", "Lab")(seq(0,1,length.out=32))
+cc <- scales::seq_gradient_pal("lightblue", "navyblue", "Lab")(seq(0,1,length.out=easting.zones*northing.zones))
 boxes$z = NA
 ggplot(raster.gridpre, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
   theme_bw() + 
   xlab("Easting") + ylab("Northing") + 
   ggtitle("Density of Simualated Relocations\nPreCO2")
@@ -256,7 +259,7 @@ raster.griddur$w <- easting.width/easting.zones
 raster.griddur$z <-  factor(grid.durcount)
 raster.griddur <- data.frame(raster.griddur)
 ggplot(raster.griddur, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
   theme_bw() + 
   xlab("Easting") + ylab("Northing") + 
   ggtitle("Density of Simualated Relocations\nDuring CO2")
@@ -267,7 +270,7 @@ raster.gridpost$w <- easting.width/easting.zones
 raster.gridpost$z <-  factor(grid.postcount)
 raster.gridpost <- data.frame(raster.gridpost)
 ggplot(raster.gridpost, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
   theme_bw() + 
   xlab("Easting") + ylab("Northing") + 
   ggtitle("Density of Simualated Relocations\nPost CO2")
@@ -281,7 +284,7 @@ raster.gridpre2$w <- easting.width/easting.zones
 raster.gridpre2$z <-  factor(grid.pre2count)
 raster.gridpre2 <- data.frame(raster.gridpre2)
 ggplot(raster.gridpre2, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
   theme_bw() + 
   xlab("Easting") + ylab("Northing") + 
   ggtitle("Density of Simualated Relocations\nPre CO2")
@@ -338,7 +341,7 @@ raster.gridpret$w <- easting.width/easting.zones
 raster.gridpret$z <-  factor(grid.pretime$sumtime)
 raster.gridpret <- data.frame(raster.gridpret)
 ggplot(raster.gridpret, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
   theme_bw() + 
   xlab("Easting") + ylab("Northing") + 
   ggtitle("Density of Time Spent\nPre CO2")
@@ -349,7 +352,7 @@ raster.griddurt$w <- easting.width/easting.zones
 raster.griddurt$z <-  factor(grid.durtime$sumtime)
 raster.griddurt <- data.frame(raster.griddurt)
 ggplot(raster.griddurt, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
   theme_bw() + 
   xlab("Easting") + ylab("Northing") + 
   ggtitle("Density of Time Spent\nDuring CO2")
