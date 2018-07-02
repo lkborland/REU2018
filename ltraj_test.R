@@ -235,7 +235,7 @@ boxes <- setNames(boxes, c("Northing", "Easting", "delta_lat", "delta_long"))
 ggplot() + 
   theme_bw() + 
   geom_segment(data=boxes, aes(x=Easting, y=Northing, xend = Easting + delta_long, yend = Northing + delta_lat)) + 
-  geom_segment(data=gridlines, aes(x=Easting, y=Northing, xend = Easting + delta_long, yend = Northing + delta_lat), color = "darkblue",
+  geom_segment(data=gridlines, aes(x=Easting, y=Northing, xend = Easting + delta_long, yend = Northing + delta_lat), color = "#7BCCC4",
                size = 1.5)
 
 #create density 'heatmap' for counts in each grid for a simulation by Period
@@ -363,7 +363,7 @@ raster.gridpostt$w <- easting.width/easting.zones
 raster.gridpostt$z <-  factor(grid.posttime$sumtime)
 raster.gridpostt <- data.frame(raster.gridpostt)
 ggplot(raster.gridpostt, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
+  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
   theme_bw() + 
   xlab("Easting") + ylab("Northing") + 
   ggtitle("Density of Time Spent\nPost CO2")
