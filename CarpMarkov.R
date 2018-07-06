@@ -2,6 +2,7 @@
 library(plyr)
 library(dplyr)
 library(ggplot2)
+library(hsmm)
 #summarize carp by trial with basic trajectory calculations
 #make df from carp1
 carp1df <- ldply(carp1)
@@ -212,6 +213,8 @@ time_gridDur2 <- carp1cDur2 %>% group_by(grid) %>% mutate(sumtime = sum(dt))
 time_gridDec2 <- carp1cDec2 %>% group_by(grid) %>% mutate(sumtime = sum(dt))
 time_gridPost2 <- carp1cPost2 %>% group_by(grid) %>% mutate(sumtime = sum(dt))
 
+#graphics---------------------------------------------------
+
 #make box "map" to show study pool with grid cells
 boxes <- data.frame(read.table(text = "0 0 10 0 
                                0 0 0 4.9 
@@ -293,6 +296,7 @@ ggplot(raster.gridpre2, aes(x=x, y=y, fill = z)) +
 grid.inc2count <- table(inc2chain)
 raster.gridinc2 <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
 raster.gridinc2$w <- easting.width/easting.zones
+raster.gridinc2$z <- NULL
 raster.gridinc2$z <-  factor(grid.inc2count)
 raster.gridinc2 <- data.frame(raster.gridinc2)
 ggplot(raster.gridinc2, aes(x=x, y=y, fill = z)) + 
