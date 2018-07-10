@@ -54,8 +54,8 @@ table(carp1c$zone[-1],carp1c$zone[-length(carp1c$zone)]) / length(carp1c$zone)
 #making boxes in pool
 easting.width <- 4.9
 northing.width <- 10
-easting.zones <- 10
-northing.zones <- 20
+easting.zones <- 5
+northing.zones <- 10
 easting.boundaries <- sort(c(0, (seq(1:easting.zones)*(easting.width/easting.zones))))
 northing.boundaries <- sort(c(0, (seq(1:northing.zones)*(northing.width/northing.zones))))
 
@@ -97,33 +97,19 @@ first.position <- carp1c$grid
 second.position <- lead(carp1c$grid, 1)
 positions <- data.frame(first.position, second.position)
 
-# makes a probability table for each specific grid cell, trial 1
-position.table <- function(position,df){
-  temp <- table(df[df$first.position==position,"second.position"]) #makes a table
-  temp <- temp/sum(temp)
-  return(temp[temp>0]) #makes the table smaller
-}
+# makes a 1-st order transition matrix trial 1
 
+carp1matrix <- table(positions$first.position, positions$second.position)/length(positions$first.position) #makes a table
 
-#transition matrix for all periods all fish, trial 1
-table(carp1c$grid[-1], carp1c$grid[-length(carp1c$grid)])
-carp1matrix <- table(carp1c$grid[-1], carp1c$grid[-length(carp1c$grid)]) / length(carp1c$grid)
-
-#general Markov chain for all periods
-carp1mchain <- function (nn, transition.matrix, start=sample(1:nrow(transition.matrix), 1)) {
-  output <- rep (NA, nn)
+#general first-order Markov chain for all periods
+carp1mchain <- function(nn, transition.matrix, start=sample(1:nrow(transition.matrix), 1)) {
+  output <- rep(NA, nn)
   output[1] <- start
+  print(output)
   for (mvmt in 2:nn) 
     output[mvmt] <- sample(ncol(transition.matrix), 1, prob=transition.matrix[output[mvmt-1],])
-  #print(table(output))
-  #print(summary(output))
   output
 }
-
-#make transition matrix for string of grid cells
-transitions <- sapply(unique(positions$first.position), position.table, positions)
-names(transitions) <- unique(positions$first.position)
-
 
 # start of second order markov 
 third.position <- lead(first.position,2)
@@ -131,19 +117,65 @@ first.second <- paste(first.position, second.position)
 positions$first.second <- first.second
 positions$third.position <- third.position
 
-# makes a transition matrix for each specific grid pair
-position.table.two <- function(position){
-  temp <- table(positions[positions$first.second==position,"third.position"]) #makes a table
-  temp <- temp/sum(temp)
-  return(temp[temp>0]) #makes the table smaller
-}
-# makes the transition matrix
-transitions2 <- sapply(unique(positions$first.second), position.table.two)
-names(transitions2) <- unique(positions$first.second)
+# makes a second order transition matrix for all periods
+
+carp1matrix2 <- table(positions$first.second, positions$third.position)/length(positions$first.second) #makes a table
+
 
 #second order Markov chain for all periods
 ##------------------------------------
+carp1mchain2 <- function(nn, transition.matrix, transition.matrix2, start = sample(1:nrow(transition.matrix), 1)) {
+  temp1 <- rownames(transition.matrix)
+  temp2 <- colnames(transition.matrix2)
+  output <- rep(NA, nn)
+  output[1] <- temp1[start]
+  secondmove <- sample(ncol(transition.matrix), 1, prob=transition.matrix[output[1],])
+  output[2] <- temp1[secondmove]
+  bothmove <- rep(NA, nn)
+  bothmove[1] <- paste(output[1], output[2])
+  for (mvmt2 in 3:nn){
+    look <- bothmove[mvmt2-2]
+    nextmove <- mvmt2-1
+    output[mvmt2] <- temp2[sample(ncol(transition.matrix2), 1, prob=transition.matrix2[look,])]
+    bothmove[nextmove] <- paste(output[nextmove], output[mvmt2])
+  }
+  return(output)
+}
 
+
+
+covert2grid <- function(chain, easting.zones, northing.zones){
+  #converts string output from the markov chain to usable grid cells
+  spl <- strsplit(chain, "")
+  len <- length(spl)
+  grid.out <- data.frame(x = rep(1:easting.zones, each=northing.zones), y = rep(1:northing.zones, easting.zones))
+  x <- rep(NA, len)
+  y <- rep(NA, len)
+  for(num in 1:len){
+    if(spl[num]=="e"){
+      for(e in 1:easting.zones){
+        if(spl[num+1]==e){
+          x[(num+3)/4] <- e
+        }
+      }
+    }
+    if(spl[num]=="n"){
+      for(n in 1:northing.zones){
+        if(spl[num+1]==n) {
+          y[(num+1)/4] <- n
+        }
+        
+      }
+    }
+  }
+  x <- x[!is.na(x)]
+  y <- y[!is.na(y)]
+  gridcell <- data.frame(xzone = x, yzone = y)
+  for(assign in 1:length(gridcell$xzone)){
+    #stopped here
+  }
+  return()
+}
 
 #simulation with 1000 relocations for all periods
 carp1mchain(1000, carp1matrix)
