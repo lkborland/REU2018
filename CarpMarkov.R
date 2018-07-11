@@ -91,6 +91,8 @@ carp1c$y.zones <- NULL
 carp1c$x.zones <- x.zones
 carp1c$y.zones <- y.zones
 carp1c <- carp1c %>% mutate(grid = paste0(x.zones, y.zones))
+carp1.1 <- NA
+carp1.1 <- carp1c[carp1c$fish==1,]
 
 #begin transition matrix work
 first.position <- carp1c$grid
@@ -105,10 +107,9 @@ carp1matrix <- table(positions$first.position, positions$second.position)/length
 carp1mchain <- function(nn, transition.matrix, start=sample(1:nrow(transition.matrix), 1)) {
   output <- rep(NA, nn)
   output[1] <- start
-  print(output)
   for (mvmt in 2:nn) 
-    output[mvmt] <- sample(ncol(transition.matrix), 1, prob=transition.matrix[output[mvmt-1],])
-  output
+    output[mvmt] <- sample(1:ncol(transition.matrix), 1, prob=transition.matrix[output[mvmt-1],])
+  return(output)
 }
 
 # start of second order markov 
@@ -143,38 +144,53 @@ carp1mchain2 <- function(nn, transition.matrix, transition.matrix2, start = samp
 }
 
 
-
-covert2grid <- function(chain, easting.zones, northing.zones){
+convert2grid <- function(chain, easting.zones, northing.zones){
   #converts string output from the markov chain to usable grid cells
-  spl <- strsplit(chain, "")
+  spl <- strsplit(chain, split="e|n")
   len <- length(spl)
   grid.out <- data.frame(x = rep(1:easting.zones, each=northing.zones), y = rep(1:northing.zones, easting.zones))
-  x <- rep(NA, len)
-  y <- rep(NA, len)
+  grid.out$numb <- c(1:(easting.zones*northing.zones))
+  x1 <- rep(NA, len)
+  y1 <- rep(NA, len)
   for(num in 1:len){
-    if(spl[num]=="e"){
-      for(e in 1:easting.zones){
-        if(spl[num+1]==e){
-          x[(num+3)/4] <- e
-        }
+    for(e in 1:easting.zones){
+      if(spl[[num]][2]==e){
+        x1[num] <- e
       }
     }
-    if(spl[num]=="n"){
-      for(n in 1:northing.zones){
-        if(spl[num+1]==n) {
-          y[(num+1)/4] <- n
-        }
-        
+    for(n in 1:northing.zones){
+      if(spl[[num]][3]==n){
+        y1[num] <- n
       }
     }
   }
-  x <- x[!is.na(x)]
-  y <- y[!is.na(y)]
-  gridcell <- data.frame(xzone = x, yzone = y)
-  for(assign in 1:length(gridcell$xzone)){
-    #stopped here
+  x1 <- x1[!is.na(x1)]
+  y1 <- y1[!is.na(y1)]
+  gridcell <- data.frame(xzone = x1, yzone = y1)
+  grid <- rep(NA, len)
+  for(assign in 1:len){
+    tempx <- gridcell[assign,"xzone"]
+    tempy <- gridcell[assign, "yzone"]
+    grid[assign] <- grid.out %>% filter(x == tempx) %>% filter(y == tempy) %>% select(numb)
   }
-  return()
+  grid <- unlist(grid)
+  return(grid)
+}
+
+positioning2 <- function(df){
+  first.position <- df$grid
+  second.position <- lead(df$grid, 1)
+  positions <- data.frame(first.position, second.position)
+  third.position <- lead(first.position,2)
+  first.second <- paste(first.position, second.position)
+  positions$first.second <- first.second
+  positions$third.position <- third.position
+  return(positions)
+}
+
+trans.matrix2 <- function(positions){
+  matrix2 <- table(positions$first.second, positions$third.position)/length(positions$first.second) #makes a table
+  return(matrix2)
 }
 
 #simulation with 1000 relocations for all periods
@@ -209,29 +225,54 @@ carp1cDec2 <- carp1c %>% filter(Period2 == "DecreasingCO2")
 carp1cPost2 <- carp1c %>% filter(Period2 == "PostCO2")
 
 #transition matrix for PreCO2 Period
-carp1mPre2 <- table(carp1cPre2$grid[-1], carp1cPre2$grid[-length(carp1cPre2$grid)]) / length(carp1cPre2$grid)
+carp1mPre2 <- table(carp1cPre2$grid[-length(carp1cPre2$grid)], carp1cPre2$grid[-1]) / length(carp1cPre2$grid)
+#transition matrix for second order
+carp1m2Pre2 <- trans.matrix2(positioning2(carp1cPre2))
 #general Markov chain for PreCO2 period simulation
 pre2chain <- carp1mchain(200000, carp1mPre2)
+#second order Markov chain
+pre2chain2 <- carp1mchain2(200000, carp1mPre2, carp1m2Pre2)
+pre2chain2 <- convert2grid(pre2chain2, easting.zones, northing.zones)
 
 #transition matrix for incCO2 Period
-carp1mInc2 <- table(carp1cInc2$grid[-1], carp1cInc2$grid[-length(carp1cInc2$grid)]) / length(carp1cInc2$grid)
+carp1mInc2 <- table(carp1cInc2$grid[-length(carp1cInc2$grid)], carp1cInc2$grid[-1]) / length(carp1cInc2$grid)
+#transition matrix second order
+carp1m2Inc2 <- trans.matrix2(positioning2(carp1cInc2))
 #general Markov chain for PreCO2 period simulation
 inc2chain <- carp1mchain(200000, carp1mInc2)
+#second order Markov chain
+inc2chain2 <- carp1mchain2(200000, carp1mInc2, carp1m2Inc2)
+inc2chain2 <- convert2grid(inc2chain2, easting.zones, northing.zones)
 
 #transition matrix for DuringCO2 Period
-carp1mDur2 <- table(carp1cDur2$grid[-1], carp1cDur2$grid[-length(carp1cDur2$grid)]) / length(carp1cDur2$grid)
+carp1mDur2 <- table(carp1cDur2$grid[-length(carp1cDur2$grid)], carp1cDur2$grid[-1]) / length(carp1cDur2$grid)
+#transition matrix second order
+carp1m2Dur2 <- trans.matrix2(positioning2(carp1cDur2))
 #general Markov chain for DuringCO2 period simulation
 dur2chain <- carp1mchain(200000, carp1mDur2)
+#second order Markov chain
+dur2chain2 <- carp1mchain2(200000, carp1mDur2, carp1m2Dur2)
+dur2chain2 <- convert2grid(dur2chain2, easting.zones, northing.zones)
 
 #transition matrix for PreCO2 Period
-carp1mDec2 <- table(carp1cDec2$grid[-1], carp1cDec2$grid[-length(carp1cDec2$grid)]) / length(carp1cDec2$grid)
+carp1mDec2 <- table(carp1cDec2$grid[-length(carp1cDec2$grid)], carp1cDec2$grid[-1]) / length(carp1cDec2$grid)
+#transition matrix second order
+carp1m2Dec2 <- trans.matrix2(positioning2(carp1cDec2))
 #general Markov chain for PreCO2 period simulation
 dec2chain <- carp1mchain(200000, carp1mDec2)
+#second order Markov chain
+dec2chain2 <- carp1mchain2(200000, carp1mDec2, carp1m2Dec2)
+dec2chain2 <- convert2grid(dec2chain2, easting.zones, northing.zones)
 
 #transition matrix for PostCO2 Period
-carp1mPost2 <- table(carp1cPost2$grid[-1], carp1cPost2$grid[-length(carp1cPost2$grid)]) / length(carp1cPost2$grid)
+carp1mPost2 <- table(carp1cPost2$grid[-length(carp1cPost2$grid)], carp1cPost2$grid[-1]) / length(carp1cPost2$grid)
+#transition matrix second order
+carp1m2Post2 <- trans.matrix2(positioning2(carp1cPost2))
 #general Markov chain for PostCO2 period simulation
 post2chain <- carp1mchain(200000, carp1mPost2)
+#second order Markov chain
+post2chain2 <- carp1mchain2(200000, carp1mPost2, carp1m2Post2)
+post2chain2 <- convert2grid(post2chain2, easting.zones, northing.zones)
 
 #total time spent in each grid cell by period
 time_gridPre <- carp1cPre %>% group_by(grid) %>% mutate(sumtime = sum(dt))
@@ -275,42 +316,39 @@ ggplot() +
                size = 1.5)
 
 #create density 'heatmap' for counts in each grid for a simulation by Period
-#PreCO2 period
-grid.precount <- table(prechain)
-raster.gridpre <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.gridpre$w <- easting.width/easting.zones
-raster.gridpre$z <-  factor(grid.precount)
-raster.gridpre <- data.frame(raster.gridpre)
-cc <- scales::seq_gradient_pal("#E0F3DB", "#084081", "Lab")(seq(0,1,length.out=easting.zones*northing.zones))
-boxes$z = NA
-ggplot(raster.gridpre, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Simualated Relocations\nPreCO2")
-#DuringCO2 period
-grid.durcount <- table(durchain)
-raster.griddur <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.griddur$w <- easting.width/easting.zones
-raster.griddur$z <-  factor(grid.durcount)
-raster.griddur <- data.frame(raster.griddur)
-ggplot(raster.griddur, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Simualated Relocations\nDuring CO2")
-#Post CO2 Period
-grid.postcount <- table(postchain)
-raster.gridpost <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.gridpost$w <- easting.width/easting.zones
-raster.gridpost$z <-  factor(grid.postcount)
-raster.gridpost <- data.frame(raster.gridpost)
-ggplot(raster.gridpost, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Simualated Relocations\nPost CO2")
+rasterdens <- function(chain, easting.boundaries, northing.boundaries){
+  #creates a df that has boundaries of the grid cells and includes a factor by count density for each grid cell
+  grid.count <- table(chain)
+  raster.grid <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+  raster.grid$w <- easting.width/easting.zones
+  raster.grid$z <- NA
+  raster.grid$z <-  factor(grid.count)
+  raster.grid <- data.frame(raster.grid)
+  return(raster.grid)
+}
 
+rasterplot <- function(raster.grid, cc, per = "PreCO2"){
+  #creates a ggplot with raster overlay based on simulated count densities
+  ggplot(raster.grid, aes(x=x, y=y, fill = z)) + 
+    geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
+    theme_bw() + 
+    xlab("Easting") + ylab("Northing") + 
+    ggtitle(sprintf("Density of Simualated Relocations\n%s", per))
+}
+
+#PreCO2 period
+raster.gridpre <- rasterdens(prechain, easting.boundaries, northing.boundaries)
+cc <- scales::seq_gradient_pal("lightblue", "navyblue", "Lab")(seq(0,1,length.out=easting.zones*northing.zones))
+boxes$z <- NA
+rasterplot(raster.gridpre, cc, "PreCO2")
+
+#DuringCO2 period
+raster.griddur <- rasterdens(durchain, easting.boundaries, northing.boundaries)
+rasterplot(raster.griddur, cc, "DuringCO2")
+
+#Post CO2 Period
+raster.gridpost <- rasterdens(postchain, easting.boundaries, northing.boundaries)
+rasterplot(raster.gridpost, cc, "PostCO2")
 
 #create density 'heatmap' for counts in each grid for a simulation by Period2
 #Pre CO2 Period2
