@@ -344,69 +344,31 @@ rasterplot(raster.gridpre, cc, "PreCO2")
 
 #DuringCO2 period
 raster.griddur <- rasterdens(durchain, easting.boundaries, northing.boundaries)
-rasterplot(raster.griddur, cc, "DuringCO2")
+rasterplot(raster.griddur, cc, "During CO2")
 
 #Post CO2 Period
 raster.gridpost <- rasterdens(postchain, easting.boundaries, northing.boundaries)
-rasterplot(raster.gridpost, cc, "PostCO2")
+rasterplot(raster.gridpost, cc, "Post CO2")
 
 #create density 'heatmap' for counts in each grid for a simulation by Period2
 #Pre CO2 Period2
-grid.pre2count <- table(pre2chain)
-raster.gridpre2 <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.gridpre2$w <- easting.width/easting.zones
-raster.gridpre2$z <-  factor(grid.pre2count)
-raster.gridpre2 <- data.frame(raster.gridpre2)
-ggplot(raster.gridpre2, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Simualated Relocations\nPre CO2")
+raster.gridpre2 <- rasterdens(pre2chain, easting.boundaries, northing.boundaries)
+rasterplot(raster.gridpre2, cc, "PreCO2")
+#Pre CO2, second order
+raster.grid2pre2 <- rasterdens(pre2chain2, easting.boundaries, northing.boundaries)
+rasterplot(raster.grid2pre2, cc, "PreCO2")
 #Inc CO2 Period2
-grid.inc2count <- table(inc2chain)
-raster.gridinc2 <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.gridinc2$w <- easting.width/easting.zones
-raster.gridinc2$z <- NULL
-raster.gridinc2$z <-  factor(grid.inc2count)
-raster.gridinc2 <- data.frame(raster.gridinc2)
-ggplot(raster.gridinc2, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Simualated Relocations\nIncreasing CO2")
+raster.gridinc2 <- rasterdens(inc2chain, easting.boundaries, northing.boundaries)
+rasterplot(raster.gridinc2, cc, "Increasing CO2")
 #Dur CO2 Period2
-grid.dur2count <- table(dur2chain)
-raster.griddur2 <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.griddur2$w <- easting.width/easting.zones
-raster.griddur2$z <-  factor(grid.dur2count)
-raster.griddur2 <- data.frame(raster.griddur2)
-ggplot(raster.griddur2, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Simualated Relocations\nDuring CO2")
+raster.griddur2 <- rasterdens(dur2chain, easting.boundaries, northing.boundaries)
+rasterplot(raster.griddur2, cc, "During CO2")
 #Dec CO2 Period2
-grid.dec2count <- table(dec2chain)
-raster.griddec2 <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.griddec2$w <- easting.width/easting.zones
-raster.griddec2$z <-  factor(grid.dec2count)
-raster.griddec2 <- data.frame(raster.griddec2)
-ggplot(raster.griddec2, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Simualated Relocations\nDecreasing CO2")
+raster.griddec2 <- rasterdens(dec2chain, easting.boundaries, northing.boundaries)
+rasterplot(raster.griddec2, cc, "Decreasing CO2")
 #Post CO2 Period2
-grid.post2count <- table(post2chain)
-raster.gridpost2 <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.gridpost2$w <- easting.width/easting.zones
-raster.gridpost2$z <-  factor(grid.post2count)
-raster.gridpost2 <- data.frame(raster.gridpost2)
-ggplot(raster.gridpost2, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Simualated Relocations\nPost CO2")
+raster.gridpost2 <- rasterdens(post2chain, easting.boundaries, northing.boundaries)
+rasterplot(raster.gridpost2, cc, "Post CO2")
 
 #create density 'heatmap' for total amount of time in each grid by Period (OG data)
 #Pre
