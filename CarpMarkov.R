@@ -351,24 +351,21 @@ raster.gridpost <- rasterdens(postchain, easting.boundaries, northing.boundaries
 rasterplot(raster.gridpost, cc, "Post CO2")
 
 #create density 'heatmap' for counts in each grid for a simulation by Period2
-#Pre CO2 Period2
-raster.gridpre2 <- rasterdens(pre2chain, easting.boundaries, northing.boundaries)
-rasterplot(raster.gridpre2, cc, "PreCO2")
 #Pre CO2, second order
 raster.grid2pre2 <- rasterdens(pre2chain2, easting.boundaries, northing.boundaries)
 rasterplot(raster.grid2pre2, cc, "PreCO2")
-#Inc CO2 Period2
-raster.gridinc2 <- rasterdens(inc2chain, easting.boundaries, northing.boundaries)
-rasterplot(raster.gridinc2, cc, "Increasing CO2")
+#Inc CO2 Period2 second order
+raster.grid2inc2 <- rasterdens(inc2chain2, easting.boundaries, northing.boundaries)
+rasterplot(raster.grid2inc2, cc, "Increasing CO2")
 #Dur CO2 Period2
-raster.griddur2 <- rasterdens(dur2chain, easting.boundaries, northing.boundaries)
-rasterplot(raster.griddur2, cc, "During CO2")
+raster.grid2dur2 <- rasterdens(dur2chain2, easting.boundaries, northing.boundaries)
+rasterplot(raster.grid2dur2, cc, "During CO2")
 #Dec CO2 Period2
-raster.griddec2 <- rasterdens(dec2chain, easting.boundaries, northing.boundaries)
-rasterplot(raster.griddec2, cc, "Decreasing CO2")
+raster.grid2dec2 <- rasterdens(dec2chain2, easting.boundaries, northing.boundaries)
+rasterplot(raster.grid2dec2, cc, "Decreasing CO2")
 #Post CO2 Period2
-raster.gridpost2 <- rasterdens(post2chain, easting.boundaries, northing.boundaries)
-rasterplot(raster.gridpost2, cc, "Post CO2")
+raster.grid2post2 <- rasterdens(post2chain2, easting.boundaries, northing.boundaries)
+rasterplot(raster.grid2post2, cc, "Post CO2")
 
 #create density 'heatmap' for total amount of time in each grid by Period (OG data)
 #Pre
