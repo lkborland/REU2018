@@ -202,17 +202,17 @@ carp1cDur <- carp1c %>% filter(Period == "DuringCO2")
 carp1cPost <- carp1c %>% filter(Period == "PostCO2")
 
 #transition matrix for PreCO2 Period
-carp1mPre <- table(carp1cPre$grid[-1], carp1cPre$grid[-length(carp1cPre$grid)]) / length(carp1cPre$grid)
+carp1mPre <- table(carp1cPre$grid[-length(carp1cPre$grid)], carp1cPre$grid[-1]) / length(carp1cPre$grid)
 #general Markov chain for PreCO2 period simulation
 prechain <- carp1mchain(200000, carp1mPre)
 
 #transition matrix for DuringCO2 Period
-carp1mDur <- table(carp1cDur$grid[-1], carp1cDur$grid[-length(carp1cDur$grid)]) / length(carp1cDur$grid)
+carp1mDur <- table(carp1cDur$grid[-length(carp1cDur$grid)], carp1cDur$grid[-1]) / length(carp1cDur$grid)
 #general Markov chain for DuringCO2 period simulation
 durchain <- carp1mchain(200000, carp1mDur)
 
 #transition matrix for PostCO2 Period
-carp1mPost <- table(carp1cPost$grid[-1], carp1cPost$grid[-length(carp1cPost$grid)]) / length(carp1cPost$grid)
+carp1mPost <- table(carp1cPost$grid[-length(carp1cPost$grid)], carp1cPost$grid[-1]) / length(carp1cPost$grid)
 #general Markov chain for PostCO2 period simulation
 postchain <- carp1mchain(200000, carp1mPost)
 
@@ -367,94 +367,87 @@ rasterplot(raster.grid2dec2, cc, "Decreasing CO2")
 raster.grid2post2 <- rasterdens(post2chain2, easting.boundaries, northing.boundaries)
 rasterplot(raster.grid2post2, cc, "Post CO2")
 
+
 #create density 'heatmap' for total amount of time in each grid by Period (OG data)
+rastertime <- function(time_grid, easting.boundaries, northing.boundaries){
+  grid.time <- time_grid %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
+  print(grid.time)
+  raster.gridt <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+  raster.gridt$w <- easting.width/easting.zones
+  raster.gridt$z <-  factor(grid.time$sumtime)
+  raster.gridt <- data.frame(raster.gridt)
+  return(raster.gridt)
+}
+#function for making ggplot for density of time spent
+rastertimeplot <- function(raster.gridt, cc, per = "Pre CO2"){
+  ggplot(raster.gridt, aes(x=x, y=y, fill = z)) + 
+    geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
+    theme_bw() + 
+    xlab("Easting") + ylab("Northing") + 
+    ggtitle(sprintf("Density of Time Spent\n%s", per))
+}
+
 #Pre
-grid.pretime <- time_gridPre %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
-raster.gridpret <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.gridpret$w <- easting.width/easting.zones
-raster.gridpret$z <-  factor(grid.pretime$sumtime)
-raster.gridpret <- data.frame(raster.gridpret)
-ggplot(raster.gridpret, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Time Spent\nPre CO2")
+raster.gridpret <- rastertime(time_gridPre, easting.boundaries, northing.boundaries)
+rastertimeplot(raster.gridpret, cc, "Pre CO2")
+
 #During
-grid.durtime <- time_gridDur %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
-raster.griddurt <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.griddurt$w <- easting.width/easting.zones
-raster.griddurt$z <-  factor(grid.durtime$sumtime)
-raster.griddurt <- data.frame(raster.griddurt)
-ggplot(raster.griddurt, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Time Spent\nDuring CO2")
+raster.griddurt <- rastertime(time_gridDur, easting.boundaries, northing.boundaries)
+rastertimeplot(raster.griddurt, cc, "During CO2")
+
 #Post
-grid.posttime <- time_gridPost %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
-raster.gridpostt <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.gridpostt$w <- easting.width/easting.zones
-raster.gridpostt$z <-  factor(grid.posttime$sumtime)
-raster.gridpostt <- data.frame(raster.gridpostt)
-ggplot(raster.gridpostt, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Time Spent\nPost CO2")
+raster.gridpostt <- rastertime(time_gridPost, easting.boundaries, northing.boundaries)
+rastertimeplot(raster.gridpostt, cc, "Post CO2")
+
 
 #create density 'heatmap' for total amount of time in each grid by Period2 (OG data)
 #Pre2
-grid.pre2time <- time_gridPre2 %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
-raster.gridpre2t <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.gridpre2t$w <- easting.width/easting.zones
-raster.gridpre2t$z <-  factor(grid.pre2time$sumtime)
-raster.gridpre2t <- data.frame(raster.gridpre2t)
-ggplot(raster.gridpre2t, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Time Spent\nPre CO2")
+raster.gridpre2t <- rastertime(time_gridPre2, easting.boundaries, northing.boundaries)
+rastertimeplot(raster.gridpre2t, cc, "Pre CO2")
+
 #Inc2
-grid.inc2time <- time_gridInc2 %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
-raster.gridinc2t <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.gridinc2t$w <- easting.width/easting.zones
-raster.gridinc2t$z <-  factor(grid.inc2time$sumtime)
-raster.gridinc2t <- data.frame(raster.gridinc2t)
-ggplot(raster.gridinc2t, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Time Spent\nIncreasing CO2")
+raster.gridinc2t <- rastertime(time_gridInc2, easting.boundaries, northing.boundaries)
+rastertimeplot(raster.gridinc2t, cc, "Increasing CO2")
+
 #Dur2
-grid.dur2time <- time_gridDur2 %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
-raster.griddur2t <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.griddur2t$w <- easting.width/easting.zones
-raster.griddur2t$z <-  factor(grid.dur2time$sumtime)
-raster.griddur2t <- data.frame(raster.griddur2t)
-ggplot(raster.griddur2t, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Time Spent\nDuring CO2")
+raster.griddur2t <- rastertime(time_gridDur2, easting.boundaries, northing.boundaries)
+rastertimeplot(raster.griddur2t, cc, "During CO2")
+
 #Dec2
-grid.dec2time <- time_gridDec2 %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
-raster.griddec2t <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.griddec2t$w <- easting.width/easting.zones
-raster.griddec2t$z <-  factor(grid.dec2time$sumtime)
-raster.griddec2t <- data.frame(raster.griddec2t)
-ggplot(raster.griddec2t, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Time Spent\nDecreasing CO2")
+raster.griddec2t <- rastertime(time_gridDec2, easting.boundaries, northing.boundaries)
+rastertimeplot(raster.griddec2t, cc, "Decreasing CO2")
+
 #Post2
-grid.post2time <- time_gridPost2 %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
-raster.gridpost2t <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
-raster.gridpost2t$w <- easting.width/easting.zones
-raster.gridpost2t$z <-  factor(grid.post2time$sumtime)
-raster.gridpost2t <- data.frame(raster.gridpost2t)
-ggplot(raster.gridpost2t, aes(x=x, y=y, fill = z)) + 
-  geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc) + 
-  theme_bw() + 
-  xlab("Easting") + ylab("Northing") + 
-  ggtitle("Density of Time Spent\nPost CO2")
+raster.gridpost2t <- rastertime(time_gridPost2, easting.boundaries, northing.boundaries)
+rastertimeplot(raster.gridpost2t, cc, "Post CO2")
+
+fishmatrix <- function(df, numfish){
+  #creates a list of  transition matrices (all 5 periods) for a specified fish number
+  df <- df %>% filter(fish == numfish)
+  #divide observations by period2 (pre, inc, dur, dec, post)
+  pre <- df %>% filter(Period2 == "PreCO2")
+  inc <- df %>% filter(Period2 == "IncreasingCO2")
+  dur <- df %>% filter(Period2 == "DuringCO2")
+  dec <- df %>% filter(Period2 == "DecreasingCO2")
+  post <- df %>% filter(Period2 == "PostCO2")
+  
+  m1 <- trans.matrix2(positioning2(pre))
+  m2 <- trans.matrix2(positioning2(inc))
+  m3 <- trans.matrix2(positioning2(dur))
+  m4 <- trans.matrix2(positioning2(dec))
+  m5 <- trans.matrix2(positioning2(post))
+  list.m <- list("Pre"=m1, "Inc"=m2, "Dur"=m3, "Dec"=m4, "Post"=m5)
+  return(list.m)
+}
+
+#transition matrices for each fish in trial 1
+fish1.01 <- fishmatrix(carp1c, 1)
+fish1.02 <- fishmatrix(carp1c, 2)
+fish1.03 <- fishmatrix(carp1c, 3)
+fish1.04 <- fishmatrix(carp1c, 4)
+fish1.05 <- fishmatrix(carp1c, 5)
+fish1.06 <- fishmatrix(carp1c, 6)
+fish1.07 <- fishmatrix(carp1c, 7)
+fish1.08 <- fishmatrix(carp1c, 8)
+fish1.09 <- fishmatrix(carp1c, 9)
+fish1.10 <- fishmatrix(carp1c, 10)
