@@ -49,7 +49,6 @@ carp1c <- carp1df[-badrows,]
 #show where barrier is, make high and low zones of CO2 distinction
 barrier <- c(2.25, 3.1)
 carp1c$zone <- ifelse(carp1c$x < barrier[1] & carp1c$y > barrier[2], "High", "Low")
-table(carp1c$zone[-1],carp1c$zone[-length(carp1c$zone)]) / length(carp1c$zone)
 
 #making boxes in pool
 easting.width <- 4.9
@@ -143,6 +142,16 @@ carp1mchain2 <- function(nn, transition.matrix, transition.matrix2, start = samp
   return(output)
 }
 
+convert2coord <- function(chain){
+  spl <- strsplit(chain, split="e|n")
+  len <- length(spl)
+  output <- data.frame(x = rep(NA, len), y = rep(NA, len))
+  for(i in 1:len){
+    output[i, "x"] <- spl[[i]][2]
+    output[i, "y"] <- spl[[i]][3]
+  }
+  return(output)
+}
 
 convert2grid <- function(chain, easting.zones, northing.zones){
   #converts string output from the markov chain to usable grid cells
@@ -451,3 +460,73 @@ fish1.07 <- fishmatrix(carp1c, 7)
 fish1.08 <- fishmatrix(carp1c, 8)
 fish1.09 <- fishmatrix(carp1c, 9)
 fish1.10 <- fishmatrix(carp1c, 10)
+
+#MORANS I TESTING----------------------------------------------------------------------
+
+mvmtavg <- function(df){
+  #creates new variables for averages of movement descriptors by grid cell
+  output <- df
+  output <- output %>% group_by(grid) %>% mutate(avgdist = mean(dist))
+  output <- output %>% group_by(grid) %>% mutate(avgt = mean(dt))
+  output <- output %>% group_by(grid) %>% mutate(avgdispl = mean(R2n))
+  output <- output %>% group_by(grid) %>% mutate(avgrang = mean(rel.angle))
+  output <- output %>% group_by(grid) %>% mutate(avgaang = mean(abs.angle))
+  output <- output %>% dplyr::select("grid", "x.zones", "y.zones", "avgdist", "avgt", "avgdispl", "avgrang", "avgaang")
+  output <- output %>% distinct(grid, .keep_all = TRUE)
+  output <- output %>% arrange(grid)
+  output$n <- seq.int(nrow(output))
+  emp_coord <- lapply(output$grid, as.character)
+  emp_coord <- unlist(emp_coord)
+  emp_coord <- convert2coord(emp_coord)
+  emp_coord$n <- seq.int(nrow(emp_coord))
+  output <- left_join(output, emp_coord, by = "n")
+  return(output)
+}
+
+library(ape)
+pre <- carp1mchain2(200000, carp1mPre2, carp1m2Pre2)
+pre <- convert2coord(pre)
+pre <- pre %>% add_count(x,y)
+pre <- pre[!duplicated(pre),]
+pre <- pre %>% arrange(y) %>% arrange(x)
+pre.dist <- as.matrix(dist(cbind(pre$x, pre$y)))
+pre.dist <- 1/pre.dist
+diag(pre.dist) <- 0
+
+#get averages of movement metrics for each grid cell
+#pre co2 period
+pre.emp <- mvmtavg(carp1cPre2)
+Moran.I(pre.emp$avgdist, pre.dist) #pvalue=0
+Moran.I(pre.emp$avgdispl, pre.dist, na.rm = TRUE) #pvalue=0
+Moran.I(pre.emp$avgrang, pre.dist, na.rm = TRUE) #pvalue=0.5118854
+Moran.I(pre.emp$avgaang, pre.dist, na.rm = TRUE) #pvalue < 0.0001
+Moran.I(pre.emp$avgt, pre.dist, na.rm = TRUE) #pvalue=0
+#Moran's I a different way, bootstrapping (monte carlo)
+library(spdep)
+w <- cell2nb(nrow = northing.zones, ncol = easting.zones, type="queen", torus=FALSE)
+ww <- nb2listw(w, style= "U")
+moran.mc(pre.emp$avgdist, ww, nsim=99) #pvalue=0.1
+moran.mc(pre.emp$avgdispl, ww, nsim=99) #pvalue=0.01
+moran.mc(pre.emp$avgrang, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.28
+moran.mc(pre.emp$avgaang, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.94
+moran.mc(pre.emp$avgt, ww, nsim=99) #pvalue=0.04
+
+#During CO2 period
+#get averages of movement metrics for each grid cell
+dur.emp <- mvmtavg(carp1cDur2)
+#monte carlo morans i test
+moran.mc(dur.emp$avgdist, ww, nsim=99) #pvalue = 0.01, stat = 0.36568
+moran.mc(dur.emp$avgdispl, ww, nsim=99) #pvalue=0.01, stat = 0.24934
+moran.mc(dur.emp$avgrang, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.46
+moran.mc(dur.emp$avgaang, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.96
+moran.mc(dur.emp$avgt, ww, nsim=99) #pvalue=0.01, stat = 0.14679
+
+#Post CO2 period
+#get averages of movement metrics for each grid cell
+post.emp <- mvmtavg(carp1cPost2)
+#monte carlo morans i test
+moran.mc(post.emp$avgdist, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue = 0.01, stat = 0.2485
+moran.mc(post.emp$avgdispl, ww, nsim=99) #pvalue=0.01, stat = 0.25339
+moran.mc(post.emp$avgrang, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.67
+moran.mc(post.emp$avgaang, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.01, stat=0.47991 (A LOT REMOVED THOUGH)
+moran.mc(post.emp$avgt, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.08
