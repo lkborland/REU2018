@@ -1,0 +1,258 @@
+#plot of velocity and distance sectioned off by each period for all fish
+plot(carp1c$xs,carp1c$ys)
+abline(v=c(47936,58434,85238,98339,135611), col = "red")
+
+carp1.1 <- carp1df[1:73039,]
+carp1.1$Period <- factor(carp1.1$Period, levels = c("PreCO2", "DuringCO2", "PostCO2"))
+
+#separate fish 1 from carp1df as example
+carp1 <- carp1df[1:73039,]
+carp1$Period <- factor(carp1.1$Period, levels = c("PreCO2", "DuringCO2", "PostCO2"))
+
+carp2.2 <- carp1df[73040:122976,]
+carp2.2$Period <- factor(carp2.2$Period, levels = c("PreCO2", "DuringCO2", "PostCO2"))
+
+carp3.3 <- carp1df[122977:182586,]
+carp3.3$Period <- factor(carp3.3$Period, levels = c("PreCO2", "DuringCO2", "PostCO2"))
+
+carp4.4 <- carp1df[182587:248716,]
+carp4.4$Period <- factor(carp4.4$Period, levels = c("PreCO2", "DuringCO2", "PostCO2"))
+
+carp5.5 <- carp1df[248717:307388,]
+carp5.5$Period <- factor(carp5.5$Period, levels = c("PreCO2", "DuringCO2", "PostCO2"))
+
+carp6.6 <- carp1df[307389:370901,]
+carp6.6$Period <- factor(carp6.6$Period, levels = c("PreCO2", "DuringCO2", "PostCO2"))
+
+carp7.7 <- carp1df[370902:444279,]
+carp7.7$Period <- factor(carp7.7$Period, levels = c("PreCO2", "DuringCO2", "PostCO2"))
+
+carp8.8 <- carp1df[444280:502373,]
+carp8.8$Period <- factor(carp8.8$Period, levels = c("PreCO2", "DuringCO2", "PostCO2"))
+carp8.8 <- carp8.8[-18,]
+
+carp9.9 <- carp1df[502374:555111,]
+carp9.9$Period <- factor(carp9.9$Period, levels = c("PreCO2", "DuringCO2", "PostCO2"))
+
+carp10.0 <- carp1df[555112:611514,]
+carp10.0$Period <- factor(carp10.0$Period, levels = c("PreCO2", "DuringCO2", "PostCO2"))
+
+#time and velocity for all carp
+carp1c$xs <- c(0,cumsum(carp1c$dt[-dim(carp1c)[1]]))
+carp1c$ys <-c(0,carp1c$dist[-dim(carp1c)[1]]/carp1c$dt[-dim(carp1c)[1]])
+
+#time and velocity for carp 1
+carp1.1$xs <- c(0,cumsum(carp1.1$dt[-dim(carp1.1)[1]]))
+carp1.1$ys <-c(0,carp1.1$dist[-dim(carp1.1)[1]]/carp1.1$dt[-dim(carp1.1)[1]])
+
+carp1$xs <- c(0,cumsum(carp1$dt[-dim(carp1)[1]]))
+carp1$ys <-c(0,carp1$dist[-dim(carp1)[1]]/carp1$dt[-dim(carp1)[1]])
+
+#time and velocity for carp2
+carp2.2$xs <- c(0,cumsum(carp2.2$dt[-dim(carp2.2)[1]]))
+carp2.2$ys <-c(0,carp2.2$dist[-dim(carp2.2)[1]]/carp2.2$dt[-dim(carp2.2)[1]])
+
+#carp3
+carp3.3$xs <- c(0,cumsum(carp3.3$dt[-dim(carp3.3)[1]]))
+carp3.3$ys <- c(0,carp3.3$dist[-dim(carp2.2)[1]]/carp3.3$dt[-dim(carp3.3)[1]])
+
+#carp4
+carp4.4$xs <- c(0,cumsum(carp4.4$dt[-dim(carp4.4)[1]]))
+carp4.4$ys <- c(0,carp4.4$dist[-dim(carp4.4)[1]]/carp4.4$dt[-dim(carp4.4)[1]])
+
+#carp5
+carp5.5$xs <- c(0,cumsum(carp5.5$dt[-dim(carp5.5)[1]]))
+carp5.5$ys <- c(0,carp5.5$dist[-dim(carp5.5)[1]]/carp5.5$dt[-dim(carp5.5)[1]])
+
+#carp6
+carp6.6$xs <- c(0,cumsum(carp6.6$dt[-dim(carp6.6)[1]]))
+carp6.6$ys <- c(0,carp6.6$dist[-dim(carp6.6)[1]]/carp6.6$dt[-dim(carp6.6)[1]])
+
+#carp7
+carp7.7$xs <- c(0,cumsum(carp7.7$dt[-dim(carp7.7)[1]]))
+carp7.7$ys <- c(0,carp7.7$dist[-dim(carp7.7)[1]]/carp7.7$dt[-dim(carp7.7)[1]])
+
+#carp8
+carp8.8$xs <- c(0,cumsum(carp8.8$dt[-dim(carp8.8)[1]]))
+carp8.8$ys <- c(0,carp8.8$dist[-dim(carp8.8)[1]]/carp8.8$dt[-dim(carp8.8)[1]])
+
+#carp9
+carp9.9$xs <- c(0,cumsum(carp9.9$dt[-dim(carp9.9)[1]]))
+carp9.9$ys <- c(0,carp9.9$dist[-dim(carp9.9)[1]]/carp9.9$dt[-dim(carp9.9)[1]])
+
+#carp10
+carp10.0$xs <- c(0,cumsum(carp10.0$dt[-dim(carp10.0)[1]]))
+carp10.0$ys <- c(0,carp10.0$dist[-dim(carp10.0)[1]]/carp10.0$dt[-dim(carp10.0)[1]])
+
+
+#velocity and distance plot of fish 1
+plot(carp1$xs,carp1$ys)
+abline(v=c(86389,107989,172775,194386,259190), col = "red")
+
+#fish 2
+plot(carp2.2$xs, carp2.2$ys)
+abline(v=c(86384,107970,172783,194384,214776), col = "red")
+
+#fish 3
+plot(carp3.3$xs, carp3.3$ys)
+abline(v=c(86346,107945,172793,194351,259043), col = "red")
+
+#fish 4
+plot(carp4.4$xs, carp4.4$ys)
+abline(v=c(86378, 107976, 172765, 194377, 259180), col = "red")
+
+#fish 5
+plot(carp5.5$xs, carp5.5$ys)
+abline(v=c(86387, 107988, 172786, 194388, 259191), col = "red")
+
+#fish 6
+plot(carp6.6$xs, carp6.6$ys)
+abline(v=c(86380, 107959, 172782, 194377, 259186), col = "red")
+
+#fish 7
+plot(carp7.7$xs, carp7.7$ys)
+abline(v=c(86383, 107984, 172771, 194386, 259111), col = "red")
+
+#fish8
+plot(carp8.8$xs, carp8.8$ys)
+abline(v=c(86444,108020, 172828, 194448, 259251), col = "red")
+
+#fish9
+plot(carp9.9$xs, carp9.9$ys)
+abline(v=c(86383, 107978, 172779, 194374, 259184), col = "red")
+
+#fish10
+plot(carp10.0$xs, carp10.0$ys)
+abline(v=c(86381, 107982, 172778, 194386, 259189), col = "red")
+
+total1 <- rbind(carp1, carp2.2, carp3.3, carp4.4, carp5.5, carp6.6, carp7.7, carp8.8, carp9.9, carp10.0)
+
+ggplot(total1, aes(x = Period2, y =ys)) + geom_boxplot() +
+  scale_y_log10()
+
+ggplot(carp1, aes(x = Period2, y = ys)) + geom_boxplot() +
+  scale_y_log10()
+
+ggplot(carp2.2, aes(x = Period2, y = ys)) + geom_boxplot() +
+  scale_y_log10()
+
+#separate dataframe by fish
+mutate_carp <- 
+  select(carp1c,fish, xs, ys, Period2) %>%
+  group_by(fish, Period2) %>%
+  mutate(Sum = cumsum(xs))
+mutate_carp
+
+#grouop and summarize max dt by each period
+mutate_carp %>%
+  group_by(Period2) %>%
+  summarize(Maxsum = max(xs, na.rm = FALSE))
+
+#group and summarize max dt by each fish
+mutate_carp %>%
+  group_by(fish, Period2) %>%
+  summarize(Maxsum.1 = max(xs, na.rm = FALSE))
+
+#mutation for first carp (carp1)
+m1 <-
+  select(carp1, xs, ys, Period2, fish) %>%
+  group_by(Period2, fish) %>%
+  mutate(Sum = cumsum(xs)) %>%
+  summarize(maxsum = max(xs, na.rm = FALSE))
+
+#mutation for second carp (carp2.2)
+m2 <-
+  select(carp2.2, xs, ys, Period2, fish) %>%
+  group_by(Period2, fish) %>%
+  mutate(Sum = cumsum(xs)) %>%
+  summarize(maxsum = max(xs, na.rm = FALSE))
+
+#mutation for third carp (carp3.3)
+m3 <-
+  select(carp3.3, xs,ys,Period2, fish) %>%
+  group_by(Period2, fish) %>%
+  mutate(Sum = cumsum(xs)) %>%
+  summarize(maxsum = max(xs,na.rm = FALSE))
+
+#mutation for fourth carp(carp4.4)
+m4 <- select(carp4.4, xs, ys, Period2, fish) %>%
+  group_by(Period2, fish) %>%
+  mutate(Sum = cumsum(xs)) %>%
+  summarize(maxsum = max(xs, na.rm = FALSE))
+
+#mutation for fifth carp(carp5.5)
+m5 <- select(carp5.5, xs, ys, Period2, fish) %>%
+  group_by(Period2, fish) %>%
+  mutate(Sum = cumsum(xs)) %>%
+  summarize(maxsum = max(xs, na.rm = FALSE))
+
+#mutation for sixth carp(carp6.6)
+m6 <- select(carp6.6, xs, ys, Period2, fish) %>%
+  group_by(Period2, fish) %>%
+  mutate(Sum = cumsum(xs)) %>%
+  summarize(maxsum = max(xs, na.rm = FALSE))
+
+#mutation for seventh carp(carp7.7)
+m7 <- select(carp7.7, xs, ys, Period2, fish) %>%
+  group_by(Period2, fish) %>%
+  mutate(Sum = cumsum(xs)) %>%
+  summarize(maxsum = max(xs, na.rm = FALSE))
+
+#mutation for eighth carp(carp8.8)
+m8 <- select(carp8.8, xs, ys, Period2, fish) %>%
+  group_by(Period2, fish) %>%
+  mutate(Sum = cumsum(xs)) %>%
+  summarize(maxsum = max(xs, na.rm = FALSE))
+
+#mutation for ninth carp(carp9.9)
+m9 <- select(carp9.9, xs, ys, Period2, fish) %>%
+  group_by(Period2, fish) %>%
+  mutate(Sum = cumsum(xs)) %>%
+  summarize(maxsum = max(xs, na.rm = FALSE))
+
+#mutation for tenth carp( carp10.0)
+m10 <- select(carp10.0, xs, ys, Period2, fish) %>%
+  group_by(Period2, fish) %>%
+  mutate(Sum = cumsum(xs)) %>%
+  summarize(maxsum = max(xs, na.rm = FALSE))
+
+#bind all mutations into one
+mtotal <- rbind(m1,m2,m3,m4,m5,m6,m7,m8,m9,m10)
+
+#quartiles and medians for each fish
+qcarp_df.2 <- group_by(carp1c, fish, Period2, zone) %>%
+  summarize(Q1 = quantile(carp1c$R2n,0.25), Med = median(carp1c$R2n,1), Q3 = quantile(carp1c$R2n,0.75))
+qcarp_df.2
+
+carp_dt <- group_by(carp1c, fish, Period2, zone) %>%
+  summarize(Q1 = quantile(carp1c$dist, 0.25), Med = median(carp1c$dist, 1), Q3 = quantile(carp1c$dist, 0.75))
+
+qcarp1 <- group_by(carp1, fish, Period2) %>%
+  summarize(Q1 = quantile(carp1$R2n,0.25), Med = median(carp1$R2n,1), Q3 = quantile(carp1$R2n,0.75))
+
+qcarp2 <- group_by(carp2.2, fish, Period2) %>%
+  summarize(Q1 = quantile(carp2.2$R2n,0.25), Med = median(carp2.2$R2n,1), Q3 = quantile(carp2.2$R2n,0.75))
+
+qcarp3 <- group_by(carp3.3, fish, Period2) %>%
+  summarize(Q1 = quantile(carp3.3$R2n,0.25), Med = median(carp3.3$R2n,1), Q3 = quantile(carp3.3$R2n,0.75))
+
+qcarp4<- group_by(carp4.4, fish, Period2) %>%
+  summarize(Q1 = quantile(carp4.4$R2n,0.25), Med = median(carp4.4$R2n,1), Q3 = quantile(carp4.4$R2n,0.75))
+
+qcarp5 <- group_by(carp5.5, fish, Period2) %>%
+  summarize(Q1 = quantile(carp5.5$R2n,0.25), Med = median(carp5.5$R2n,1), Q3 = quantile(carp5.5$R2n,0.75))
+  
+qcarp6 <- group_by(carp6.6, fish, Period2) %>%
+    summarize(Q1 = quantile(carp6.6$R2n,0.25), Med = median(carp6.6$R2n,1), Q3 = quantile(carp6.6$R2n,0.75)) 
+
+qcarp7 <- group_by(carp7.7, fish, Period2) %>%
+  summarize(Q1 = quantile(carp7.7$R2n,0.25), Med = median(carp7.7$R2n,1), Q3 = quantile(carp7.7$R2n,0.75))
+
+qcarp8 <- group_by(carp8.8, fish, Period2) %>%
+  summarize(Q1 = quantile(carp8.8$R2n,0.25), Med = median(carp8.8$R2n,1), Q3 = quantile(carp8.8$R2n,0.75))
+
+qcarp9 <- group_by(carp9.9, fish, Period2) %>%
+  summarize(Q1 = quantile(carp9.9$R2n,0.25), Med = median(carp9.9$R2n,1), Q3 = quantile(carp9.9$R2n,0.75))  
+
+qcarp10 <- group_by(carp10.0, fish, Period2) %>%
+  summarize(Q1 = quantile(carp10.0$R2n,0.25), Med = median(carp10.0$R2n,1), Q3 = quantile(carp10.0$R2n,0.75))
