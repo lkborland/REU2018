@@ -83,6 +83,7 @@ for(i in 1:leny){
 }
 
 
+
 #create variable for exact grid the fish is in
 carp1c$x.zones <- NULL
 carp1c$y.zones <- NULL
@@ -379,11 +380,14 @@ rasterplot(raster.grid2post2, cc, "Post CO2")
 
 #create density 'heatmap' for total amount of time in each grid by Period (OG data)
 rastertime <- function(time_grid, easting.boundaries, northing.boundaries){
-  grid.time <- time_grid %>% select("sumtime", "grid") %>% arrange(grid) %>% distinct()
-  print(grid.time)
+  grid.time <- distinct(time_grid, grid)
+  grid.time <- mixedsort(grid.time$grid)
+  time_grid <- time_grid %>% distinct(sumtime, grid)
+  time_grid$grid <- factor(time_grid$grid, levels = grid.time)
+  time_grid <- arrange(time_grid, grid)
   raster.gridt <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
   raster.gridt$w <- easting.width/easting.zones
-  raster.gridt$z <-  factor(grid.time$sumtime)
+  raster.gridt$z <-  factor(time_grid$sumtime)
   raster.gridt <- data.frame(raster.gridt)
   return(raster.gridt)
 }
