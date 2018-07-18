@@ -343,7 +343,9 @@ rasterplot <- function(raster.grid, cc, per = "PreCO2"){
     geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
     theme_bw() + 
     xlab("Easting") + ylab("Northing") + 
-    ggtitle(sprintf("Density of Simualated Relocations\n%s", per))
+    ggtitle(sprintf("Density of Simualated Relocations\n%s", per)) +
+    theme(plot.title = element_text(size = 30)) +
+    theme(axis.title = element_text(size=25))
 }
 
 #PreCO2 period
@@ -392,12 +394,15 @@ rastertime <- function(time_grid, easting.boundaries, northing.boundaries){
   return(raster.gridt)
 }
 #function for making ggplot for density of time spent
+library(gtools)
 rastertimeplot <- function(raster.gridt, cc, per = "Pre CO2"){
   ggplot(raster.gridt, aes(x=x, y=y, fill = z)) + 
     geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
     theme_bw() + 
     xlab("Easting") + ylab("Northing") + 
-    ggtitle(sprintf("Density of Time Spent\n%s", per))
+    ggtitle(sprintf("Density of Time Spent\n%s", per)) +
+    theme(plot.title = element_text(size = 30)) +
+    theme(axis.title = element_text(size=25))
 }
 
 #Pre
@@ -475,7 +480,9 @@ mvmtavg <- function(df){
   output <- output %>% group_by(grid) %>% mutate(avgdispl = mean(R2n))
   output <- output %>% group_by(grid) %>% mutate(avgrang = mean(rel.angle))
   output <- output %>% group_by(grid) %>% mutate(avgaang = mean(abs.angle))
-  output <- output %>% dplyr::select("grid", "x.zones", "y.zones", "avgdist", "avgt", "avgdispl", "avgrang", "avgaang")
+  output <- output %>% group_by(grid) %>% mutate(vel = dist/(dt))
+  output <- output %>% group_by(grid) %>% mutate(avgv = mean(vel))
+  output <- output %>% dplyr::select("grid", "x.zones", "y.zones", "avgdist", "avgt", "avgdispl", "avgrang", "avgaang", "avgv")
   output <- output %>% distinct(grid, .keep_all = TRUE)
   output <- output %>% arrange(grid)
   output$n <- seq.int(nrow(output))
@@ -500,11 +507,6 @@ diag(pre.dist) <- 0
 #get averages of movement metrics for each grid cell
 #pre co2 period
 pre.emp <- mvmtavg(carp1cPre2)
-Moran.I(pre.emp$avgdist, pre.dist) #pvalue=0
-Moran.I(pre.emp$avgdispl, pre.dist, na.rm = TRUE) #pvalue=0
-Moran.I(pre.emp$avgrang, pre.dist, na.rm = TRUE) #pvalue=0.5118854
-Moran.I(pre.emp$avgaang, pre.dist, na.rm = TRUE) #pvalue < 0.0001
-Moran.I(pre.emp$avgt, pre.dist, na.rm = TRUE) #pvalue=0
 #Moran's I a different way, bootstrapping (monte carlo)
 library(spdep)
 w <- cell2nb(nrow = northing.zones, ncol = easting.zones, type="queen", torus=FALSE)
@@ -514,6 +516,7 @@ moran.mc(pre.emp$avgdispl, ww, nsim=99) #pvalue=0.01
 moran.mc(pre.emp$avgrang, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.28
 moran.mc(pre.emp$avgaang, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.94
 moran.mc(pre.emp$avgt, ww, nsim=99) #pvalue=0.04
+moran.mc(pre.emp$avgv, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.06
 
 #During CO2 period
 #get averages of movement metrics for each grid cell
@@ -524,6 +527,7 @@ moran.mc(dur.emp$avgdispl, ww, nsim=99) #pvalue=0.01, stat = 0.24934
 moran.mc(dur.emp$avgrang, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.46
 moran.mc(dur.emp$avgaang, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.96
 moran.mc(dur.emp$avgt, ww, nsim=99) #pvalue=0.01, stat = 0.14679
+moran.mc(dur.emp$avgv, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.01, stat=0.36796
 
 #Post CO2 period
 #get averages of movement metrics for each grid cell
@@ -534,3 +538,4 @@ moran.mc(post.emp$avgdispl, ww, nsim=99) #pvalue=0.01, stat = 0.25339
 moran.mc(post.emp$avgrang, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.67
 moran.mc(post.emp$avgaang, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.01, stat=0.47991 (A LOT REMOVED THOUGH)
 moran.mc(post.emp$avgt, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.08
+moran.mc(post.emp$avgv, ww, nsim=99, na.action = na.omit, zero.policy = TRUE) #pvalue=0.01, stat=0.2601
