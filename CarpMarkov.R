@@ -439,7 +439,9 @@ rastertimeplot(raster.griddec2t, cc, "Decreasing CO2")
 raster.gridpost2t <- rastertime(time_gridPost2, easting.boundaries, northing.boundaries)
 rastertimeplot(raster.gridpost2t, cc, "Post CO2")
 
-fishmatrix <- function(df, numfish){
+
+#BY FISH------------------------------------------------------------------------------------------
+fishmatrix2 <- function(df, numfish){
   #creates a list of  transition matrices (all 5 periods) for a specified fish number
   df <- df %>% filter(fish == numfish)
   #divide observations by period2 (pre, inc, dur, dec, post)
@@ -458,17 +460,116 @@ fishmatrix <- function(df, numfish){
   return(list.m)
 }
 
-#transition matrices for each fish in trial 1
-fish1.01 <- fishmatrix(carp1c, 1)
-fish1.02 <- fishmatrix(carp1c, 2)
-fish1.03 <- fishmatrix(carp1c, 3)
-fish1.04 <- fishmatrix(carp1c, 4)
-fish1.05 <- fishmatrix(carp1c, 5)
-fish1.06 <- fishmatrix(carp1c, 6)
-fish1.07 <- fishmatrix(carp1c, 7)
-fish1.08 <- fishmatrix(carp1c, 8)
-fish1.09 <- fishmatrix(carp1c, 9)
-fish1.10 <- fishmatrix(carp1c, 10)
+#transition matrix for each fish trial 1
+fishmatrix <- function(df, numfish){
+  #creates a list of transition matrices (all 5 periods) for a specified fish number
+  df <- df %>% filter(fish == numfish)
+  #divide observations by period2
+  pre <- df %>% filter(Period2 == "PreCO2")
+  inc <- df %>% filter(Period2 == "IncreasingCO2")
+  dur <- df %>% filter(Period2 == "DuringCO2")
+  dec <- df %>% filter(Period2 == "DecreasingCO2")
+  post <- df %>% filter(Period2 == "PostCO2")
+  
+  m1 <- table(pre$grid[-length(pre$grid)], pre$grid[-1]) / length(pre$grid)
+  m2 <- table(inc$grid[-length(inc$grid)], inc$grid[-1]) / length(inc$grid)
+  m3 <- table(dur$grid[-length(dur$grid)], dur$grid[-1]) / length(dur$grid)
+  m4 <- table(dec$grid[-length(dec$grid)], dec$grid[-1]) / length(dec$grid)
+  m5 <- table(post$grid[-length(post$grid)], post$grid[-1]) / length(post$grid)
+  list.m <- list("Pre"=m1, "Inc"=m2, "Dur"=m3, "Dec"=m4, "Post"=m5)
+  return(list.m)
+}
+
+#second order transition matrices for each fish in trial 1
+fish1.01 <- fishmatrix2(carp1c, 1)
+fish1.02 <- fishmatrix2(carp1c, 2)
+fish1.03 <- fishmatrix2(carp1c, 3)
+fish1.04 <- fishmatrix2(carp1c, 4)
+fish1.05 <- fishmatrix2(carp1c, 5)
+fish1.06 <- fishmatrix2(carp1c, 6)
+fish1.07 <- fishmatrix2(carp1c, 7)
+fish1.08 <- fishmatrix2(carp1c, 8)
+fish1.09 <- fishmatrix2(carp1c, 9)
+fish1.10 <- fishmatrix2(carp1c, 10)
+fish.01 <- fishmatrix(carp1c, 1)
+fish.02 <- fishmatrix(carp1c, 2)
+fish.03 <- fishmatrix(carp1c, 3)
+fish.04 <- fishmatrix(carp1c, 4)
+fish.05 <- fishmatrix(carp1c, 5)
+fish.06 <- fishmatrix(carp1c, 6)
+fish.07 <- fishmatrix(carp1c, 7)
+fish.08 <- fishmatrix(carp1c, 8)
+fish.09 <- fishmatrix(carp1c, 9)
+fish.10 <- fishmatrix(carp1c, 10)
+
+#second order Markov chain
+chain.f <- function(matrix1, matrix2){
+  #get markov chain results for each period
+  prechain <- carp1mchain2(50000, matrix1[[1]], matrix2[[1]])
+  incchain <- carp1mchain2(50000, matrix1[[2]], matrix2[[2]])
+  durchain <- carp1mchain2(50000, matrix1[[3]], matrix2[[3]])
+  decchain <- carp1mchain2(50000, matrix1[[4]], matrix2[[4]])
+  postchain <- carp1mchain2(50000, matrix1[[5]], matrix2[[5]])
+  list.m <- list("Pre"=prechain, "Inc"=incchain, "Dur"=durchain, "Dec"=decchain, "Post"=postchain)
+  return(list.m)
+}
+
+chain1.01 <- chain.f(fish.01, fish1.01)
+chain1.02 <- chain.f(fish.02, fish1.02)
+chain1.03 <- chain.f(fish.03, fish1.03)
+chain1.04 <- chain.f(fish.04, fish1.04)
+chain1.05 <- chain.f(fish.05, fish1.05)
+chain1.06 <- chain.f(fish.06, fish1.06)
+chain1.07 <- chain.f(fish.07, fish1.07)
+chain1.08 <- chain.f(fish.08, fish1.08)
+chain1.09 <- chain.f(fish.09, fish1.09)
+chain1.10 <- chain.f(fish.10, fish1.10)
+
+
+convert.f <- function(chain, e.z = easting.zones, n.z = northing.zones){
+  #convert markov chain results into grid cells
+  prechain <- convert2grid(chain[[1]], e.z, n.z)
+  incchain <- convert2grid(chain[[2]], e.z, n.z)
+  durchain <- convert2grid(chain[[3]], e.z, n.z)
+  decchain <- convert2grid(chain[[4]], e.z, n.z)
+  postchain <- convert2grid(chain[[5]], e.z, n.z)
+  list.m <- list("Pre"=prechain, "Inc"=incchain, "Dur"=durchain, "Dec"=decchain, "Post"=postchain)
+  return(list.m)
+}
+
+chain1.01 <- convert.f(chain1.01)
+chain1.04 <- convert.f(chain1.04)
+chain1.06 <- convert.f(chain1.06)
+chain1.07 <- convert.f(chain1.07)
+chain1.08 <- convert.f(chain1.08)
+chain1.09 <- convert.f(chain1.09)
+chain1.10 <- convert.f(chain1.10)
+
+r1 <- rasterdens.f(chain1.01, easting.boundaries, northing.boundaries, period = 3)
+
+#create density 'heatmap' for counts in each grid for a simulation by specified period for one fish
+rasterdens.f <- function(chain, easting.boundaries, northing.boundaries, period = 1){
+  #creates a df that has boundaries of the grid cells and includes a factor by count density for each grid cell
+  grid.count <- table(chain[[period]])
+  raster.grid <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+  raster.grid$w <- easting.width/easting.zones
+  raster.grid$z <- NA
+  raster.grid$z <-  factor(grid.count)
+  raster.grid <- data.frame(raster.grid)
+  return(raster.grid)
+}
+
+rasterplot.f <- function(raster.grid, cc, per = "PreCO2"){
+  #creates a ggplot with raster overlay based on simulated count densities
+  ggplot(raster.grid, aes(x=x, y=y, fill = z)) + 
+    geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
+    theme_bw() + 
+    xlab("Easting") + ylab("Northing") + 
+    ggtitle(sprintf("Density of Simualated Relocations\n%s", per)) +
+    theme(plot.title = element_text(size = 30)) +
+    theme(axis.title = element_text(size=25))
+}
+
 
 #MORANS I TESTING----------------------------------------------------------------------
 
