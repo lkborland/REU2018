@@ -10,3 +10,4 @@ Hello! This is the repository for Lauren K Borland and Collin Mulcahy's Ecologic
 	* calculating row-wise total variance (variance of movement choice probabilities based on each starting point) for each fish
 	* weighting total variance by proportion of time spent in each specific grid cell / starting point
 	* summing total variances to get a single metric to analyze the signal (changes from pre-co2 to during-co2) over the noise (changes between fish in the periods)
+https://github.com/lkborland/REU2018/blob/master/CarpMarkov.R is where most of my work is currently.
