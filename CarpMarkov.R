@@ -546,6 +546,13 @@ chain1.09 <- convert.f(chain1.09)
 chain1.10 <- convert.f(chain1.10)
 
 r1 <- rasterdens.f(chain1.01, easting.boundaries, northing.boundaries, period = 3)
+r4 <- rasterdens.f(chain1.04, easting.boundaries, northing.boundaries, period = 3)
+r6 <- rasterdens.f(chain1.06, easting.boundaries, northing.boundaries, period = 3)
+r7 <- rasterdens.f(chain1.07, easting.boundaries, northing.boundaries, period = 1)
+r8 <- rasterdens.f(chain1.08, easting.boundaries, northing.boundaries, period = 1)
+r9 <- rasterdens.f(chain1.09, easting.boundaries, northing.boundaries, period = 1)
+r10 <- rasterdens.f(chain1.10, easting.boundaries, northing.boundaries, period = 1)
+
 
 #create density 'heatmap' for counts in each grid for a simulation by specified period for one fish
 rasterdens.f <- function(chain, easting.boundaries, northing.boundaries, period = 1){
@@ -569,6 +576,56 @@ rasterplot.f <- function(raster.grid, cc, per = "PreCO2"){
     theme(plot.title = element_text(size = 30)) +
     theme(axis.title = element_text(size=25))
 }
+
+
+#TESTING TRANSITION MATRICES WITH TOTAL VARIANCE----------------------------------------------
+tV <- function(m1, m2) {
+  #creating function for getting total variation row-wise between two matrices m1 and m2
+  row.out <- 0
+  col.out <- 0
+  for(i in 1:nrow(m1)){
+    for(j in 1:ncol(m1)){
+      col.out[j] <- abs(m1[i, j] - m2[i, j])
+    }
+    row.out[i] <- max(col.out)
+  }
+  return(row.out)
+}
+
+#get proportion of time spent in each cell by period and fish
+fish.gridtime <- function(df, f = 1, per = "Pre"){
+  #creates a list of transition matrices (all 5 periods) for a specified fish number
+  df <- df %>% filter(fish == f)
+  #divide observations by period2
+  pre <- df %>% filter(Period2 == "PreCO2") %>% group_by(grid) %>% mutate(sumtime = sum(dt)) %>% arrange(grid)
+  inc <- df %>% filter(Period2 == "IncreasingCO2") %>% group_by(grid) %>% mutate(sumtime = sum(dt)) %>% arrange(grid)
+  dur <- df %>% filter(Period2 == "DuringCO2") %>% group_by(grid) %>% mutate(sumtime = sum(dt)) %>% arrange(grid)
+  dec <- df %>% filter(Period2 == "DecreasingCO2") %>% group_by(grid) %>% mutate(sumtime = sum(dt)) %>% arrange(grid)
+  post <- df %>% filter(Period2 == "PostCO2") %>% group_by(grid) %>% mutate(sumtime = sum(dt)) %>% arrange(grid)
+  #get just the sum time spent in each cell as a vector arranged by grid cell name
+  v1 <- pre %>% dplyr::select(sumtime) %>% distinct(sumtime) %>% pull(sumtime)
+  v2 <- inc %>% dplyr::select(sumtime) %>% distinct(sumtime) %>% pull(sumtime)
+  v3 <- dur %>% dplyr::select(sumtime) %>% distinct(sumtime) %>% pull(sumtime)
+  v4 <- dec %>% dplyr::select(sumtime) %>% distinct(sumtime) %>% pull(sumtime)
+  v5 <- post %>% dplyr::select(sumtime) %>% distinct(sumtime) %>% pull(sumtime) %>% na.omit()
+  print(v5)
+  #calculate proportion of time 
+  v1.sum <- sum(v1)
+  v2.sum <- sum(v2)
+  v3.sum <- sum(v3)
+  v4.sum <- sum(v4)
+  v5.sum <- sum(v5)
+  print(v5.sum)
+  v1 <- v1 / v1.sum
+  v2 <- v2 / v2.sum
+  v3 <- v3 / v3.sum
+  v4 <- v4 / v4.sum
+  v5 <- v5 / v5.sum
+  #return list of vectors of proportion of times for each grid cell
+  list.m <- list("Pre"=v1, "Inc"=v2, "Dur"=v3, "Dec"=v4, "Post"=v5)
+  return(list.m[[per]])
+}
+
 
 
 #MORANS I TESTING----------------------------------------------------------------------
