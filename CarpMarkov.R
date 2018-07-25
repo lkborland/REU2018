@@ -583,6 +583,13 @@ tV <- function(m1, m2) {
   #creating function for getting total variation row-wise between two matrices m1 and m2
   row.out <- 0
   col.out <- 0
+  dim1 <- dim(m1)[1]
+  dim2 <- dim(m2)[1]
+  if(dim1 > dim2){
+    m1 <- m1[(row.names(m1) %in% row.names(m2)),(row.names(m1) %in% row.names(m2))]
+  }else if(dim2 > dim1){
+    m2 <- m2[(row.names(m2) %in% row.names(m1)),(row.names(m2) %in% row.names(m1))]
+  }
   for(i in 1:nrow(m1)){
     for(j in 1:ncol(m1)){
       col.out[j] <- abs(m1[i, j] - m2[i, j])
@@ -592,39 +599,38 @@ tV <- function(m1, m2) {
   return(row.out)
 }
 
-#get proportion of time spent in each cell by period and fish
-fish.gridtime <- function(df, f = 1, per = "Pre"){
-  #creates a list of transition matrices (all 5 periods) for a specified fish number
-  df <- df %>% filter(fish == f)
-  #divide observations by period2
-  pre <- df %>% filter(Period2 == "PreCO2") %>% group_by(grid) %>% mutate(sumtime = sum(dt)) %>% arrange(grid)
-  inc <- df %>% filter(Period2 == "IncreasingCO2") %>% group_by(grid) %>% mutate(sumtime = sum(dt)) %>% arrange(grid)
-  dur <- df %>% filter(Period2 == "DuringCO2") %>% group_by(grid) %>% mutate(sumtime = sum(dt)) %>% arrange(grid)
-  dec <- df %>% filter(Period2 == "DecreasingCO2") %>% group_by(grid) %>% mutate(sumtime = sum(dt)) %>% arrange(grid)
-  post <- df %>% filter(Period2 == "PostCO2") %>% group_by(grid) %>% mutate(sumtime = sum(dt)) %>% arrange(grid)
+#get proportion of time spent in each cell by fish
+fish.gridtime <- function(df, f = 1, per1="PreCO2", per2="DuringCO2"){
+  
+  df <- df %>% filter(fish == f) %>% filter(Period %in% c(per1, per2))
+  df %>% group_by(grid, Period) %>% summarize()
+  
+  #get sum of time per grid cell
+  df <- df %>%  group_by(grid) %>% mutate(sumtime = sum(dt)) %>% arrange(grid)
+  
   #get just the sum time spent in each cell as a vector arranged by grid cell name
-  v1 <- pre %>% dplyr::select(sumtime) %>% distinct(sumtime) %>% pull(sumtime)
-  v2 <- inc %>% dplyr::select(sumtime) %>% distinct(sumtime) %>% pull(sumtime)
-  v3 <- dur %>% dplyr::select(sumtime) %>% distinct(sumtime) %>% pull(sumtime)
-  v4 <- dec %>% dplyr::select(sumtime) %>% distinct(sumtime) %>% pull(sumtime)
-  v5 <- post %>% dplyr::select(sumtime) %>% distinct(sumtime) %>% pull(sumtime) %>% na.omit()
-  print(v5)
+  v1 <- df %>% dplyr::select(sumtime) %>% distinct(sumtime) %>% na.omit() %>% pull(sumtime)
+  
+ 
   #calculate proportion of time 
   v1.sum <- sum(v1)
-  v2.sum <- sum(v2)
-  v3.sum <- sum(v3)
-  v4.sum <- sum(v4)
-  v5.sum <- sum(v5)
-  print(v5.sum)
+
   v1 <- v1 / v1.sum
-  v2 <- v2 / v2.sum
-  v3 <- v3 / v3.sum
-  v4 <- v4 / v4.sum
-  v5 <- v5 / v5.sum
-  #return list of vectors of proportion of times for each grid cell
-  list.m <- list("Pre"=v1, "Inc"=v2, "Dur"=v3, "Dec"=v4, "Post"=v5)
-  return(list.m[[per]])
+
+  #return vector of proportion of times for each grid cell
+  return(v1)
 }
+
+tv.01 <- sum(tV(fish.01[[1]], fish.01[[3]]) * fish.gridtime(carp1c, f=1))
+tv.02 <- sum(tV(fish.02[[1]], fish.02[[3]]) * fish.gridtime(carp1c, f=2)) #
+tv.03 <- sum(tV(fish.03[[1]], fish.03[[3]]) * fish.gridtime(carp1c, f=3))
+tv.04 <- sum(tV(fish.04[[1]], fish.04[[3]]) * fish.gridtime(carp1c, f=4))
+tv.05 <- sum(tV(fish.05[[1]], fish.05[[3]]) * fish.gridtime(carp1c, f=5)) #
+tv.06 <- sum(tV(fish.06[[1]], fish.06[[3]]) * fish.gridtime(carp1c, f=6)) #
+tv.07 <- sum(tV(fish.07[[1]], fish.07[[3]]) * fish.gridtime(carp1c, f=7))
+tv.08 <- sum(tV(fish.08[[1]], fish.08[[3]]) * fish.gridtime(carp1c, f=8))
+tv.09 <- sum(tV(fish.09[[1]], fish.09[[3]]) * fish.gridtime(carp1c, f=9)) #
+tv.10 <- sum(tV(fish.10[[1]], fish.10[[3]]) * fish.gridtime(carp1c, f=10))
 
 
 
