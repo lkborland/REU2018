@@ -343,9 +343,9 @@ rasterplot <- function(raster.grid, cc, per = "PreCO2"){
     geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
     theme_bw() + 
     xlab("Easting") + ylab("Northing") + 
-    ggtitle(sprintf("Density of Simualated Relocations\n%s", per)) +
-    theme(plot.title = element_text(size = 30)) +
-    theme(axis.title = element_text(size=25))
+    ggtitle(sprintf("Density of Simualated Relocations\n%s", per))# +
+   # theme(plot.title = element_text(size = 30)) +
+    #theme(axis.title = element_text(size=25))
 }
 
 #PreCO2 period
@@ -400,9 +400,9 @@ rastertimeplot <- function(raster.gridt, cc, per = "Pre CO2"){
     geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
     theme_bw() + 
     xlab("Easting") + ylab("Northing") + 
-    ggtitle(sprintf("Density of Time Spent\n%s", per)) +
-    theme(plot.title = element_text(size = 30)) +
-    theme(axis.title = element_text(size=25))
+    ggtitle(sprintf("Density of Time Spent\n%s", per)) #+
+    #theme(plot.title = element_text(size = 30)) +
+    #theme(axis.title = element_text(size=25))
 }
 
 #Pre
@@ -572,9 +572,9 @@ rasterplot.f <- function(raster.grid, cc, per = "PreCO2"){
     geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
     theme_bw() + 
     xlab("Easting") + ylab("Northing") + 
-    ggtitle(sprintf("Density of Simualated Relocations\n%s", per)) +
-    theme(plot.title = element_text(size = 30)) +
-    theme(axis.title = element_text(size=25))
+    ggtitle(sprintf("Density of Simualated Relocations\n%s", per)) #+
+    #theme(plot.title = element_text(size = 30)) +
+   # theme(axis.title = element_text(size=25))
 }
 
 
@@ -600,16 +600,17 @@ tV <- function(m1, m2) {
 }
 
 #get proportion of time spent in each cell by fish
-fish.gridtime <- function(df, f = 1, per1="PreCO2", per2="DuringCO2"){
+fish.gridtime <- function(df, f = 1, m){
   
-  df <- df %>% filter(fish == f) %>% filter(Period %in% c(per1, per2))
-  df %>% group_by(grid, Period) %>% summarize()
+  df <- df %>% filter(fish == f)
+  r.name <- row.names(m[row.names(m),])
   
   #get sum of time per grid cell
-  df <- df %>%  group_by(grid) %>% mutate(sumtime = sum(dt)) %>% arrange(grid)
+  df <- df %>%  group_by(grid) %>% na.omit() %>% mutate(sumtime = sum(dt))  %>% arrange(grid)
   
   #get just the sum time spent in each cell as a vector arranged by grid cell name
-  v1 <- df %>% dplyr::select(sumtime) %>% distinct(sumtime) %>% na.omit() %>% pull(sumtime)
+  v1 <- df %>% dplyr::select(sumtime) %>% distinct(sumtime) %>% filter(grid %in% r.name)
+  v1 <- v1 %>% pull(sumtime)
   
  
   #calculate proportion of time 
@@ -621,16 +622,16 @@ fish.gridtime <- function(df, f = 1, per1="PreCO2", per2="DuringCO2"){
   return(v1)
 }
 
-tv.01 <- sum(tV(fish.01[[1]], fish.01[[3]]) * fish.gridtime(carp1c, f=1))
-tv.02 <- sum(tV(fish.02[[1]], fish.02[[3]]) * fish.gridtime(carp1c, f=2)) #
-tv.03 <- sum(tV(fish.03[[1]], fish.03[[3]]) * fish.gridtime(carp1c, f=3))
-tv.04 <- sum(tV(fish.04[[1]], fish.04[[3]]) * fish.gridtime(carp1c, f=4))
-tv.05 <- sum(tV(fish.05[[1]], fish.05[[3]]) * fish.gridtime(carp1c, f=5)) #
-tv.06 <- sum(tV(fish.06[[1]], fish.06[[3]]) * fish.gridtime(carp1c, f=6)) #
-tv.07 <- sum(tV(fish.07[[1]], fish.07[[3]]) * fish.gridtime(carp1c, f=7))
-tv.08 <- sum(tV(fish.08[[1]], fish.08[[3]]) * fish.gridtime(carp1c, f=8))
-tv.09 <- sum(tV(fish.09[[1]], fish.09[[3]]) * fish.gridtime(carp1c, f=9)) #
-tv.10 <- sum(tV(fish.10[[1]], fish.10[[3]]) * fish.gridtime(carp1c, f=10))
+tv.01 <- sum(tV(fish.01[[1]], fish.01[[3]]) * fish.gridtime(carp1c, f=1, m = fish.01[[3]]))
+tv.02 <- sum(tV(fish.02[[1]], fish.02[[3]]) * fish.gridtime(carp1c, f=2, m = fish.02[[3]])) 
+tv.03 <- sum(tV(fish.03[[1]], fish.03[[3]]) * fish.gridtime(carp1c, f=3, m = fish.03[[3]]))
+tv.04 <- sum(tV(fish.04[[1]], fish.04[[3]]) * fish.gridtime(carp1c, f=4, m = fish.04[[3]]))
+tv.05 <- sum(tV(fish.05[[1]], fish.05[[3]]) * fish.gridtime(carp1c, f=5, m = fish.05[[3]])) 
+tv.06 <- sum(tV(fish.06[[1]], fish.06[[3]]) * fish.gridtime(carp1c, f=6, m = fish.06[[3]])) 
+tv.07 <- sum(tV(fish.07[[1]], fish.07[[3]]) * fish.gridtime(carp1c, f=7, m = fish.07[[3]]))
+tv.08 <- sum(tV(fish.08[[1]], fish.08[[3]]) * fish.gridtime(carp1c, f=8, m = fish.08[[3]]))
+tv.09 <- sum(tV(fish.09[[1]], fish.09[[3]]) * fish.gridtime(carp1c, f=9, m = fish.09[[3]])) 
+tv.10 <- sum(tV(fish.10[[1]], fish.10[[3]]) * fish.gridtime(carp1c, f=10, m = fish.10[[3]]))
 
 
 
