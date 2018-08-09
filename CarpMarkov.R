@@ -294,7 +294,7 @@ time_gridPre2 <- carp1cPre2 %>% group_by(grid) %>% mutate(sumtime = sum(dt))
 time_gridInc2 <- carp1cInc2 %>% group_by(grid) %>% mutate(sumtime = sum(dt))
 time_gridDur2 <- carp1cDur2 %>% group_by(grid) %>% mutate(sumtime = sum(dt))
 time_gridDec2 <- carp1cDec2 %>% group_by(grid) %>% mutate(sumtime = sum(dt))
-time_gridPost2 <- carp1cPost2 %>% group_by(grid) %>% mutate(sumtime = sum(dt))
+time_gridPost2 <- carp1cPost2 %>% group_by(grid) %>% na.omit() %>% mutate(sumtime = sum(dt))
 
 #graphics---------------------------------------------------
 
@@ -342,11 +342,41 @@ rasterplot <- function(raster.grid, cc, per = "PreCO2"){
   ggplot(raster.grid, aes(x=x, y=y, fill = z)) + 
     geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
     theme_bw() + 
-    xlab("Easting") + ylab("Northing") + 
-    ggtitle(sprintf("Density of Simualated Relocations\n%s", per))# +
-   # theme(plot.title = element_text(size = 30)) +
-    #theme(axis.title = element_text(size=25))
+    xlab("East") + ylab("North") + 
+    ggtitle(sprintf("Simualated Density\n%s", per)) +
+    theme(plot.title = element_text(size = 35)) +
+    theme(axis.title = element_text(size=30))
 }
+
+
+#for movement metrics
+rastermoran <- function(data = post.emp, easting.boundaries, northing.boundaries){
+  #creates a df that has boundaries of the grid cells and includes a factor by count density for each grid cell
+  d <- mixedsort(post.emp$grid)
+  data <- data[match(d, post.emp$grid), c("grid", "avgv")]
+  m <- matrix(data$avgv, ncol = 50, byrow = TRUE)
+  colnames(m) <- data$grid
+  m <- as.table(m)
+  raster.grid <- data.frame(x = rep(easting.boundaries[-1], each=northing.zones), y = rep(northing.boundaries[-1], easting.zones))
+  raster.grid$w <- easting.width/easting.zones
+  raster.grid$z <- NA
+  raster.grid$z <- factor(m)
+  raster.grid <- data.frame(raster.grid)
+  return(raster.grid)
+}
+rasterplot_m <- function(raster.grid, cc, per = "PreCO2"){
+  #creates a ggplot with raster overlay based on simulated count densities
+  ggplot(raster.grid, aes(x=x, y=y, fill = z)) + 
+    geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
+    theme_bw() + 
+    xlab("East") + ylab("North") + 
+    ggtitle(sprintf("Avg Metric\n%s", per)) +
+    theme(plot.title = element_text(size = 35)) +
+    theme(axis.title = element_text(size=30))
+}
+#dur distance
+
+rasterplot_m((rastermoran(post.emp, easting.boundaries, northing.boundaries)), cc, "Post CO2 Velocity")
 
 #PreCO2 period
 raster.gridpre <- rasterdens(prechain, easting.boundaries, northing.boundaries)
@@ -365,7 +395,7 @@ rasterplot(raster.gridpost, cc, "Post CO2")
 #create density 'heatmap' for counts in each grid for a simulation by Period2
 #Pre CO2, second order
 raster.grid2pre2 <- rasterdens(pre2chain2, easting.boundaries, northing.boundaries)
-rasterplot(raster.grid2pre2, cc, "PreCO2")
+rasterplot(raster.grid2pre2, cc, "Pre CO2")
 #Inc CO2 Period2 second order
 raster.grid2inc2 <- rasterdens(inc2chain2, easting.boundaries, northing.boundaries)
 rasterplot(raster.grid2inc2, cc, "Increasing CO2")
@@ -400,9 +430,9 @@ rastertimeplot <- function(raster.gridt, cc, per = "Pre CO2"){
     geom_raster(hjust=0, vjust=0) + scale_fill_manual(values=cc, guide=FALSE) + 
     theme_bw() + 
     xlab("Easting") + ylab("Northing") + 
-    ggtitle(sprintf("Density of Time Spent\n%s", per)) #+
-    #theme(plot.title = element_text(size = 30)) +
-    #theme(axis.title = element_text(size=25))
+    ggtitle(sprintf("Density of Time Spent\n%s", per)) +
+    theme(plot.title = element_text(size = 35)) +
+    theme(axis.title = element_text(size=30))
 }
 
 #Pre
@@ -622,6 +652,7 @@ fish.gridtime <- function(df, f = 1, m){
   return(v1)
 }
 
+#distance from pre to during matrices
 tv.01 <- sum(tV(fish.01[[1]], fish.01[[3]]) * fish.gridtime(carp1c, f=1, m = fish.01[[3]]))
 tv.02 <- sum(tV(fish.02[[1]], fish.02[[3]]) * fish.gridtime(carp1c, f=2, m = fish.02[[3]])) 
 tv.03 <- sum(tV(fish.03[[1]], fish.03[[3]]) * fish.gridtime(carp1c, f=3, m = fish.03[[3]]))
@@ -633,6 +664,25 @@ tv.08 <- sum(tV(fish.08[[1]], fish.08[[3]]) * fish.gridtime(carp1c, f=8, m = fis
 tv.09 <- sum(tV(fish.09[[1]], fish.09[[3]]) * fish.gridtime(carp1c, f=9, m = fish.09[[3]])) 
 tv.10 <- sum(tV(fish.10[[1]], fish.10[[3]]) * fish.gridtime(carp1c, f=10, m = fish.10[[3]]))
 
+#distance from pre to post matrices
+tv.01pp <- sum(tV(fish.01[[1]], fish.01[[5]]) * fish.gridtime(carp1c, f=1, m = fish.01[[5]]))
+tv.02pp <- sum(tV(fish.02[[1]], fish.02[[5]]) * fish.gridtime(carp1c, f=2, m = fish.02[[5]])) 
+tv.03pp <- sum(tV(fish.03[[1]], fish.03[[5]]) * fish.gridtime(carp1c, f=3, m = fish.03[[5]]))
+tv.04pp <- sum(tV(fish.04[[1]], fish.04[[5]]) * fish.gridtime(carp1c, f=4, m = fish.04[[5]]))
+tv.05pp <- sum(tV(fish.05[[1]], fish.05[[5]]) * fish.gridtime(carp1c, f=5, m = fish.05[[5]])) 
+tv.06pp <- sum(tV(fish.06[[1]], fish.06[[5]]) * fish.gridtime(carp1c, f=6, m = fish.06[[5]])) 
+tv.07pp <- sum(tV(fish.07[[1]], fish.07[[5]]) * fish.gridtime(carp1c, f=7, m = fish.07[[5]]))
+tv.08pp <- sum(tV(fish.08[[1]], fish.08[[5]]) * fish.gridtime(carp1c, f=8, m = fish.08[[5]]))
+tv.09pp <- sum(tV(fish.09[[1]], fish.09[[5]]) * fish.gridtime(carp1c, f=9, m = fish.09[[5]])) 
+tv.10pp <- sum(tV(fish.10[[1]], fish.10[[5]]) * fish.gridtime(carp1c, f=10, m = fish.10[[5]]))
+
+tv.all <- c(tv.01, tv.02, tv.03, tv.04, tv.05, tv.06, tv.07, tv.08, tv.09, tv.10)
+tv.allpp <- c(tv.01pp, tv.02pp, tv.03pp, tv.04pp, tv.05pp, tv.06pp, tv.07pp, tv.08pp, tv.09pp, tv.10pp)
+
+tv.df <- data.frame(tv.all)
+tv.dfpp <- data.frame(tv.allpp)
+
+wilcox.test(tv.df$tv.all, tv.dfpp$tv.allpp, paired = TRUE)
 
 
 #MORANS I TESTING----------------------------------------------------------------------
