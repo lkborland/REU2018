@@ -1,6 +1,3 @@
-# sets working directory in my E drive for asian carp trial data
-setwd("E:/REU 2018/Archive")
-
 # setting data frames for each of three trials, reading from csv files
 trial1 <- read.csv("trial1data.csv")
 trial2 <- read.csv("trial2data.csv")
