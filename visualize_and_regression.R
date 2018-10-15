@@ -1,7 +1,6 @@
 ## Load packages
 library(ggplot2)
 library(data.table)
-library(quantreg)
 library(lmerTest)
 
 ## define colorblind friendly colors

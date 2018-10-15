@@ -1,11 +1,10 @@
 ## Load necessary packages
 library(data.table)
 library(ggplot2)
-library(plyr)
-library(dplyr)
 library(lmerTest)
 library(foreach)
 library(doParallel)
+
 
 source("./markovFunctions.R")
 

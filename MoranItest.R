@@ -165,6 +165,8 @@ head(abs.angleOut)
 summary(lmer(observed ~ Period + (1| TagCodeTrial), data = abs.angleOut))
 
 
-
+sink("sessionInfo.txt")
+print(sessionInfo())
+sink()
 
 
