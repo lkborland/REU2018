@@ -22,6 +22,6 @@ This repository contains the following files:
 - [`markovFunctions.R`](https://github.com/lkborland/REU2018/blob/master/MoranIfunctions.R), which contains helper files for the Markov Model script. 
 - [`MoranItest.R`](https://github.com/lkborland/REU2018/blob/master/MoranItest.R), uses Moran's I test to examine if a spatial correlation exists among cells.
 - [`MoranIfunctions.R`](https://github.com/lkborland/REU2018/blob/master/MoranIfunctions.R), which contains helper files for the Moran's I test script. 
-
+- [`SessionInfo.txt`](https://github.com/lkborland/REU2018/blob/master/sessionInfo.txt), which contains the session information and version numbers of package used. 
 
 The files are listed in rough order of analyzes and increasing analyzes complexity. 
