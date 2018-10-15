@@ -81,7 +81,6 @@ mod.mvmt <- lm(dist ~ Period, data=carp1df)
 summary(mod.mvmt)
 anova(mod.mvmt)
 
-
 #create boxplot displaying relative angle (absolute values) trial 1
 #make new variable for absolute value of relative angle
 carp1ARA <- mutate(carp1df, absrelang = abs(rel.angle))
@@ -120,7 +119,7 @@ summary(mod.acc)
 
 
 #create cumulative distance plot trial 1 fish 1
-carp1cdist <- ggplot(carp1.1, aes(x = date, y = cumsum(dist), color = Period)) + 
+carp1cdist <- ggplot(carp1.1, aes(x = date, y = cumsum(dist), color = Perido )) + 
   geom_line(aes(size = Period)) +
   scale_color_manual("Period", values = c("sienna1", "sienna3", "sienna4"))+
   scale_size_manual("Period", values = c(2.5,2.5,2.5))+

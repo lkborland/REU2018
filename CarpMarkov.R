@@ -722,7 +722,8 @@ diag(pre.dist) <- 0
 #get averages of movement metrics for each grid cell
 #pre co2 period
 pre.emp <- mvmtavg(carp1cPre2)
-#Moran's I a different way, bootstrapping (monte carlo)
+
+##Moran's I a different way, bootstrapping (monte carlo)
 library(spdep)
 w <- cell2nb(nrow = northing.zones, ncol = easting.zones, type="queen", torus=FALSE)
 ww <- nb2listw(w, style= "U")
