@@ -3,7 +3,6 @@ library(ggplot2)
 library(data.table)
 library(lubridate)
 library(adehabitatHR)
-
 library(foreach)
 library(doParallel)
 
@@ -67,10 +66,7 @@ acceleration <- trialLocation[ , .(acc = dist/(dt^2)),
                                       Period, Period2, x, y) ]
 acceleration
 
-## Calculate cumulative distance 
-
 ## file to save
-
 fwrite(x = trial, file = "trial.csv")
 fwrite(x = trialLocation, file = "trialLocation.csv")
 fwrite(x = acceleration, file = "acceleration.csv")

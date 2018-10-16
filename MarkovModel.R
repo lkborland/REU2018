@@ -1,4 +1,5 @@
 ## Load necessary packages
+library(dplyr)
 library(data.table)
 library(ggplot2)
 library(lmerTest)
@@ -16,11 +17,6 @@ trialLocation <- fread("trialLocation.csv")
 trialLocation[ , Trial := factor(Trial)]
 trialLocation[ , Period := factor(Period, levels = unique(Period))]
 trialLocation[ , Period2 := factor(Period2, levels = unique(Period2))]
-
-## add in barrier details and zones of CO2 
-barrier <- c(2.25, 3.1)
-## trialLocation[ , zone := ifelse(x < barrier[1] & y > barrier[2], "High", "Low")]
-
 
 #making boxes in pool
 easting.width <- 4.9
@@ -92,10 +88,10 @@ firstOrderOut <- foreach(i = 1:nrow(tagTrialList),
 
 
 tagSummary <- firstOrderOut[ , .(N = sum(N)), by = .( period, fish.cell, x, y, species)]
-tagSummary[ , sum(N), by = period]
-tagSummary[ , Nperiod := sum(N), by = period]
-tagSummary[ , prob :=  N/Nperiod, by = period]
-tagSummary[ , sum(prob), by = period]
+tagSummary[ , sum(N), by = .(period, species)]
+tagSummary[ , Nperiod := sum(N), by = .(period, species)]
+tagSummary[ , prob :=  N/Nperiod, by = .(period, species)]
+tagSummary[ , sum(prob), by = .(period, species)]
 
 ## create barrier data.frame for plotting
 barrierLocation <- data.frame(x = c(0.5, 2.6),
@@ -119,6 +115,40 @@ ggsave(plot = firstOrderMarkovOut, file = "firstOrderMarkov.pdf", width = 9, hei
 ggsave(plot = firstOrderMarkovOut, file = "firstOrderMarkov.jpg", width = 9, height = 6)
 
 
+trialLocation[ , PeriodSppTotal := .N, by = .(Period2, Species)]
+empericalFish <-    trialLocation[ , .N,
+                                  by = .(Period2, grid, x.zone, y.zone, Species)]
+empericalFish[ , Nperiod := sum(N), by = .(Period2, Species)]
+empericalFish[ , prob := N/sum(N), by = .(Period2, Species)]
+
+setnames(empericalFish, c( "period", "fish.cell", "x", "y", "species", "N", "Nperiod", "prob"))
+
+tagSummary[ , Type := "Simulated"]
+empericalFish[ , Type := "Observed"]
+
+tagSummary[ , sum(prob), by = .(period, species)]
+empericalFish[ , sum(prob), by = .(period, species)]
+
+plotAll <- rbind(tagSummary,
+                 empericalFish)
+
+
+firstOrderMarkovOutWithData <- ggplot( ) +
+    geom_raster(data = plotAll, aes(x = x, y = y, fill = prob)) +
+    facet_grid( species + Type ~ period) +
+    xlab("x cell") +
+    ylab("y cell") +
+    theme_bw() +
+    theme(strip.background = element_blank()) + 
+    scale_fill_continuous("Occurance\nProbability") +
+    geom_path( data = wallLocation, aes(x = x, y = y), size = 3, color = "white") +
+    geom_line( data = barrierLocation, aes(x = x, y = y), size = 5, color = "orange") 
+
+print(firstOrderMarkovOutWithData)
+ggsave(plot = firstOrderMarkovOutWithData, file = "firstOrderMarkovWithData.pdf", width = 9, height = 6)
+ggsave(plot = firstOrderMarkovOutWithData, file = "firstOrderMarkovWithData.jpg", width = 9, height = 6)
+
+
 ## Examine mean prob as fish stays in the same cell
 ## Note this would be the equivalent of examining the mean of the diag, if in vector form 
 diagMean <- firstOrder[ first.positions == second.positions, .(meanNoMove = mean(prob)),
@@ -140,4 +170,5 @@ ggsave("sameCell.jpg", ggSameCell, width = 6, height = 4)
 diaMeanLmer <- diagMean[ , lmer( meanNoMove ~ Period2 + Species + (1 | Trial)) ] 
 summary(diaMeanLmer)
 
+cbind(fixef(diaMeanLmer), confint(diaMeanLmer)[ -c(1:2),])
 

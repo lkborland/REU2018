@@ -75,9 +75,9 @@ firstFunction <- function(index, tagTrialList,
         acUse[  is.na(eval(as.symbol(varUse))), (varUse) := 0]
 
     ## Create Markov Matrix    
-    linputVector = firstOrder[ TagCodeTrial == tagTrialList[ index ,
-                                                           TagCodeTrial] &
-                              Period2 == tagTrialList[ index, Period2] ]
+    inputVector = firstOrder[ TagCodeTrial == tagTrialList[ index ,
+                                                            TagCodeTrial] &
+                               Period2 == tagTrialList[ index, Period2] ]
     
     allCells[ , cellCoord := paste( xCell, yCell, sep = "-")]
     

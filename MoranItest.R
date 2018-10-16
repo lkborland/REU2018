@@ -2,6 +2,7 @@
 ## format data
 source("MarkovModel.R")
 library(ape)
+library(dplyr)
 
 
 ## Analyze acceleration by cell
@@ -39,7 +40,12 @@ print(MoranIacc)
 ggsave(file = "MoranI_acc.pdf", MoranIacc, width = 6, height = 4)
 
 head(accOut)
-summary(lmer(observed ~ Period + (1| TagCodeTrial), data = accOut))
+accLmer <- lmer(observed ~ Period + (1| TagCodeTrial), data = accOut)
+summary(accLmer)
+
+accConfInt <- data.frame(cbind(fixef(accLmer),
+                    confint(accLmer)[-c(1:2),]
+                    ))
 
 ## Analyze velocity by cell
 velocity <- trialLocation[ , .(acc = dist/(dt)),
@@ -58,7 +64,6 @@ allCells <- data.table(expand.grid(xCell =  1:maxCell[ , xMax], yCell = 1:maxCel
 setkey(allCells, xCell, yCell)
 
 ## loop through all fish during all trial
-source("MoranIfunctions.R")
 registerDoParallel(cores = 4)
 
 velOut <- foreach( i = 1:nrow(tagTrialList),
@@ -80,8 +85,12 @@ print(MoranIvel)
 ggsave(file = "MoranI_vel.pdf", MoranIvel, width = 6, height = 4)
 
 
-head(velOut)
-summary(lmer(observed ~ Period + (1| TagCodeTrial), data = velOut))
+velLmer <- lmer(observed ~ Period + (1| TagCodeTrial), data = velOut)
+summary(velLmer)
+
+velConfInt <- data.frame(cbind(fixef(velLmer),
+                    confint(velLmer)[-c(1:2),]
+                    ))
 
 ## Examine first order observations
 trialCellAve <- trialLocation[ , .(abs.angle = mean(abs.angle, na.rm = TRUE),
@@ -112,8 +121,13 @@ ggsave(file = "MoranI_dist.pdf", MoranIdist, width = 6, height = 4)
 
 
 head(distOut)
-summary(lmer(observed ~ Period + (1| TagCodeTrial), data = distOut))
+distLmer <- lmer(observed ~ Period + (1| TagCodeTrial), data = distOut)
 
+summary(distLmer)
+
+distConfInt <- data.frame(cbind(fixef(distLmer),
+                     confint(distLmer)[-c(1:2),]
+                     ))
 
 ## Examine relative angle
 rel.angleOut <- foreach( i = 1:nrow(tagTrialList),
@@ -137,7 +151,14 @@ ggsave(file = "MoranI_rel.angle.pdf", MoranIrel.angle, width = 6, height = 4)
 
 
 head(rel.angleOut)
-summary(lmer(observed ~ Period + (1| TagCodeTrial), data = rel.angleOut))
+relLmer <- lmer(observed ~ Period + (1| TagCodeTrial), data = rel.angleOut)
+
+summary(relLmer)
+
+relAngleConfInt <- data.frame(
+    cbind(fixef(relLmer),
+          confint(relLmer)[-c(1:2),]
+          ))
 
 
 ## Examine abs angle
@@ -162,9 +183,94 @@ ggsave(file = "MoranI_abs.angle.pdf", MoranIabs.angle, width = 6, height = 4)
 
 
 head(abs.angleOut)
-summary(lmer(observed ~ Period + (1| TagCodeTrial), data = abs.angleOut))
+absLmer <- lmer(observed ~ Period + (1| TagCodeTrial), data = abs.angleOut)
+summary(absLmer)
+
+absAngleConfInt <- data.frame(cbind(fixef(absLmer),
+                                    confint(absLmer)[-c(1:2),]
+                                    ))
 
 
+## Merge together and plot all results
+
+head(accOut)
+accOut$EndPoint <- "Acceleration"
+head(velOut)
+velOut$EndPoint <-  "Velocity"
+head(distOut)
+distOut$EndPoint <- "Distance"
+head(rel.angleOut)
+rel.angleOut$EndPoint <- "Relative angle"
+head(abs.angleOut)
+abs.angleOut$EndPoint <- "Absolute angle"
+
+allEndPoints <- rbind(velOut,
+                      accOut,
+                      distOut,
+                      rel.angleOut,
+                      abs.angleOut)
+
+
+
+MoranIall <-
+    ggplot(allEndPoints, aes(x = Period, y = observed)) +
+    geom_violin(draw_quantiles = 0.5) +
+    geom_point() +
+    theme_bw() +
+    geom_hline(aes(yintercept = expected), color = 'red', size = 2) +
+    facet_grid( EndPoint ~ . ) + 
+    ylab("Observed Moran's I") +
+    xlab("Trial Period") +
+    theme(
+        strip.background = element_blank()
+    ) 
+print(MoranIall) 
+
+ggsave(file = "MoranI_all.pdf", MoranIall, width = 6, height = 8)
+
+accConfInt$EndPoint <- "Acceleration"
+velConfInt$EndPoint <-  "Velocity"
+distConfInt$EndPoint <- "Distance"
+relAngleConfInt$EndPoint <- "Relative angle"
+absAngleConfInt$EndPoint <- "Absolute angle"
+
+allConfInt <- rbind(
+    accConfInt,
+    velConfInt,
+    distConfInt,
+    relAngleConfInt,
+    absAngleConfInt)
+
+head(allConfInt)
+allConfInt$Coefficient <- gsub("(\\))\\d$", "\\1", rownames(allConfInt))
+allConfInt$Coefficient <- gsub("(2)\\d$", "\\1",   allConfInt$Coefficient)
+allConfInt$Coefficient <- gsub("\\(|\\)|Period", "", allConfInt$Coefficient)
+head(allConfInt)
+
+colnames(allConfInt)[1:3] <- c("Estimate", "L95", "U95")
+
+rownames(allConfInt) <- 1:nrow(allConfInt)
+
+
+
+allConfInt$Coefficient <- factor( allConfInt$Coefficient,
+                                 levels = rev(unique(allConfInt$Coefficient)))
+
+
+ggplot(allConfInt, aes(x = Coefficient, y= Estimate, ymin = L95, ymax = U95)) +
+    geom_point() +
+    geom_linerange() +
+    facet_grid(EndPoint~ . ) +
+    coord_flip() +
+    geom_hline(yintercept = 0, color = "red") +
+    theme_bw() +
+        theme(
+        strip.background = element_blank()
+        ) +
+    ylab("Regression estimate for Moran's I") 
+
+
+                         
 sink("sessionInfo.txt")
 print(sessionInfo())
 sink()

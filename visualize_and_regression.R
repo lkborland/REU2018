@@ -20,6 +20,39 @@ trialLocation[ , unique(Period)]
 trialLocation[ , Period2 := factor(Period2, levels = unique(Period2))]
 trialLocation[ , unique(Period2)]
 
+## Relative angle 
+rel.angle <- trialLocation[ ,
+                               .(median = quantile(rel.angle,
+                                                   probs = c(0.5), na.rm = TRUE),
+                                 u75 = quantile(rel.angle,
+                                                probs = c(0.75), na.rm = TRUE)),
+                               by = .(TagCodeTrial, Species, Period,
+                                      Period2, Trial)]
+
+raAllData <- ggplot(data = trialLocation, aes(x = Period2, y = rel.angle)) +
+    geom_boxplot()  + theme_minimal() +
+    ylab("Absolute relative angle") +
+    xlab(expression("Period of CO"[2]*" treatment")) 
+print(raAllData)
+
+ggsave('raAllData.pdf', raAllData, width = 6, height = 4)
+
+## Create plot 
+u75lmerRel <- lmer(u75 ~ Period2 + (1|Trial), data = rel.angle)
+summary(u75lmerRel)
+cbind(fixef(u75lmerRel), 
+      confint(u75lmerRel)[ - c(1:2), ])
+
+u75plotRel <- ggplot(data = rel.angle, aes(x = Period2, y = u75)) +
+    geom_violin(draw_quantiles = c(0.5), fill = NA) +
+    scale_color_manual(values = cbPalette) +
+    ylab("Upper 75th quantile\n of absolute relative angle") +
+    xlab(expression("Period of CO"[2]*" treatment")) +
+    theme_bw() 
+u75plotRel
+ggsave("u75plotRel.pdf", u75plotRel, width = 6, height = 4)    
+
+
 ## absolute relative angle
 
 abs.rel.angle <- trialLocation[ ,
@@ -33,11 +66,13 @@ araAllData <- ggplot(data = trialLocation, aes(x = Period2, y = abs.rel.angle)) 
     geom_boxplot()  + theme_minimal() +
     ylab("Absolute relative angle") +
     xlab(expression("Period of CO"[2]*" treatment")) 
+print(araAllData)
 ggsave('araAllData.pdf', araAllData, width = 6, height = 4)
 
 ## Create plot 
 u75lmer <- lmer(u75 ~ Period2 + (1|Trial), data = abs.rel.angle)
 summary(u75lmer)
+confint(u75lmer)
 
 u75plot <- ggplot(data = abs.rel.angle, aes(x = Period2, y = u75)) +
     geom_violin(draw_quantiles = c(0.5), fill = NA) +
@@ -69,11 +104,14 @@ accAll <- ggplot(acceleration, aes(x = Period2, y = acc)) +
     ) +
     theme_minimal() +
     scale_y_sqrt()
+print(accAll)
 ggsave("accAll.pdf", accAll, width = 6, height = 4)
 
 
 acc_u75lmer <- lmer(u75 ~ Period2 + (1|Trial), data = acc)
 summary(acc_u75lmer)
+
+cbind(fixef(acc_u75lmer), confint(acc_u75lmer)[ -c(1:2),])
 
 acc_u75plot <- ggplot(data = acc, aes(x = Period2, y = u75)) +
     geom_violin(draw_quantiles = c(0.5), fill = NA) +
@@ -105,6 +143,11 @@ ggsave('distAllData.pdf', distAllData, width = 6, height = 4)
 ## Create plot 
 dist_u75lmer <- lmer(u75 ~ Period2 + (1|Trial), data = distT)
 summary(dist_u75lmer)
+
+cbind(
+    fixef(dist_u75lmer),
+    confint(dist_u75lmer)[ -c(1:2),]
+ )
 
 dist_u75plot <- ggplot(data = distT, aes(x = Period2, y = u75)) +
     geom_violin(draw_quantiles = c(0.5), fill = NA) +
