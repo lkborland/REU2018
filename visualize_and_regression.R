@@ -29,21 +29,31 @@ rel.angle <- trialLocation[ ,
                                by = .(TagCodeTrial, Species, Period,
                                       Period2, Trial)]
 
-raAllData <- ggplot(data = trialLocation, aes(x = Period2, y = rel.angle)) +
+raAllData <- ggplot(data = trialLocation, aes(x = Period2, y = rel.angle, color = Species)) +
     geom_boxplot()  + theme_minimal() +
     ylab("Absolute relative angle") +
+    scale_color_manual(values = cbPalette) +
     xlab(expression("Period of CO"[2]*" treatment")) 
 print(raAllData)
 
 ggsave('raAllData.pdf', raAllData, width = 6, height = 4)
 
-## Create plot 
-u75lmerRel <- lmer(u75 ~ Period2 + (1|Trial), data = rel.angle)
+## Create plot
+u75lmerRel <- lmer(u75 ~ Period2 + Species + (1|Trial), data = rel.angle)
 summary(u75lmerRel)
-cbind(fixef(u75lmerRel), 
-      confint(u75lmerRel)[ - c(1:2), ])
+u75lmerRelCI <- data.frame(cbind(fixef(u75lmerRel), 
+                                 confint(u75lmerRel)[ - c(1:2), ]))
 
-u75plotRel <- ggplot(data = rel.angle, aes(x = Period2, y = u75)) +
+
+u75lmerRelCI$Parameter <-
+    gsub("\\(|\\)|Period2", "", rownames(u75lmerRelCI))
+colnames(u75lmerRelCI)[1:3] <- c("Coefficient", "l95", "u95")
+u75lmerRelCI$Endpoint <- "Relative angle"
+    
+
+
+
+u75plotRel <- ggplot(data = rel.angle, aes(x = Period2, y = u75, color = Species)) +
     geom_violin(draw_quantiles = c(0.5), fill = NA) +
     scale_color_manual(values = cbPalette) +
     ylab("Upper 75th quantile\n of absolute relative angle") +
@@ -54,7 +64,6 @@ ggsave("u75plotRel.pdf", u75plotRel, width = 6, height = 4)
 
 
 ## absolute relative angle
-
 abs.rel.angle <- trialLocation[ ,
                                .(median = quantile(abs.rel.angle,
                                                    probs = c(0.5), na.rm = TRUE),
@@ -62,19 +71,33 @@ abs.rel.angle <- trialLocation[ ,
                                                 probs = c(0.75), na.rm = TRUE)),
                                by = .(TagCodeTrial, Species, Period,
                                       Period2, Trial)]
-araAllData <- ggplot(data = trialLocation, aes(x = Period2, y = abs.rel.angle)) +
+araAllData <- ggplot(data = trialLocation, aes(x = Period2, y = abs.rel.angle, color = Species)) +
     geom_boxplot()  + theme_minimal() +
     ylab("Absolute relative angle") +
     xlab(expression("Period of CO"[2]*" treatment")) 
 print(araAllData)
 ggsave('araAllData.pdf', araAllData, width = 6, height = 4)
 
-## Create plot 
-u75lmer <- lmer(u75 ~ Period2 + (1|Trial), data = abs.rel.angle)
+## Create plot
+u75lmer <- lmer(u75 ~ Period2 + (1|Trial) + Species, data = abs.rel.angle)
 summary(u75lmer)
 confint(u75lmer)
 
-u75plot <- ggplot(data = abs.rel.angle, aes(x = Period2, y = u75)) +
+
+
+u75lmerAbsCI <- data.frame(cbind(fixef(u75lmer), 
+                                 confint(u75lmer)[ - c(1:2), ]))
+
+
+u75lmerAbsCI$Parameter <-
+    gsub("\\(|\\)|Period2", "", rownames(u75lmerAbsCI))
+colnames(u75lmerAbsCI)[1:3] <- c("Coefficient", "l95", "u95")
+u75lmerAbsCI$Endpoint <- "Absolute relative angle"
+
+
+
+
+u75plot <- ggplot(data = abs.rel.angle, aes(x = Period2, y = u75, color = Species)) +
     geom_violin(draw_quantiles = c(0.5), fill = NA) +
     scale_color_manual(values = cbPalette) +
     ylab("Upper 75th quantile\n of absolute relative angle") +
@@ -95,7 +118,7 @@ acc <- acceleration[ ,
                     by = .(TagCodeTrial, Species, Period,
                            Period2, Trial)]
 
-accAll <- ggplot(acceleration, aes(x = Period2, y = acc)) +
+accAll <- ggplot(acceleration, aes(x = Period2, y = acc, color = Species)) +
     geom_boxplot() +
     ylab(expression("Fish acceleration m"*s^-2)) +
     xlab(expression("Period of CO"[2]*" treatment")) +
@@ -108,12 +131,30 @@ print(accAll)
 ggsave("accAll.pdf", accAll, width = 6, height = 4)
 
 
-acc_u75lmer <- lmer(u75 ~ Period2 + (1|Trial), data = acc)
+acc$Period2 <- factor(acc$Period2)
+acc$Period2 <- factor(acc$Period2, levels = levels(acc$Period2)[c(5,1:4)])
+
+acc_u75lmer <- lmer(u75 ~ Period2 + (1|Trial) + Species, data = acc)
 summary(acc_u75lmer)
 
 cbind(fixef(acc_u75lmer), confint(acc_u75lmer)[ -c(1:2),])
 
-acc_u75plot <- ggplot(data = acc, aes(x = Period2, y = u75)) +
+
+u75lmerACCCI <- data.frame(cbind(fixef(acc_u75lmer), 
+                                 confint(acc_u75lmer)[ - c(1:2), ]))
+
+
+u75lmerACCCI$Parameter <-
+    gsub("\\(|\\)|Period2", "", rownames(u75lmerACCCI))
+colnames(u75lmerACCCI)[1:3] <- c("Coefficient", "l95", "u95")
+u75lmerACCCI$Endpoint <- "Acceleration"
+
+
+u75lmerAbsCI
+u75lmerRelCI
+u75lmerACCCI
+
+ACC_u75plot <- ggplot(data = acc, aes(x = Period2, y = u75, color = Species)) +
     geom_violin(draw_quantiles = c(0.5), fill = NA) +
     scale_color_manual(values = cbPalette) +
     ylab("Upper 75th quantile\n of acceleration") +
@@ -133,23 +174,35 @@ distT <- trialLocation[ ,
                       by = .(TagCodeTrial, Species, Period,
                              Period2, Trial)]
 
-distAllData <- ggplot(data = trialLocation, aes(x = Period2, y = dist)) +
+distAllData <- ggplot(data = trialLocation, aes(x = Period2, y = dist, color = Species)) +
     geom_boxplot()  + theme_minimal() +
     ylab("Distance traveled") +
     xlab(expression("Period of CO"[2]*" treatment"))
 distAllData
 ggsave('distAllData.pdf', distAllData, width = 6, height = 4)
 
+
 ## Create plot 
-dist_u75lmer <- lmer(u75 ~ Period2 + (1|Trial), data = distT)
+distT$Period2
+dist_u75lmer <- lmer(u75 ~ Period2 + Species +  (1|Trial), data = distT)
 summary(dist_u75lmer)
 
-cbind(
-    fixef(dist_u75lmer),
-    confint(dist_u75lmer)[ -c(1:2),]
- )
+u75lmerDistCI <- data.frame(
+    cbind(
+        fixef(dist_u75lmer),
+        confint(dist_u75lmer)[ -c(1:2),]
+    )
+)
 
-dist_u75plot <- ggplot(data = distT, aes(x = Period2, y = u75)) +
+
+u75lmerDistCI$Parameter <-
+    gsub("\\(|\\)|Period2", "", rownames(u75lmerDistCI))
+colnames(u75lmerDistCI)[1:3] <- c("Coefficient", "l95", "u95")
+u75lmerDistCI$Endpoint <- "Distance"
+
+
+
+dist_u75plot <- ggplot(data = distT, aes(x = Period2, y = u75, color = Species)) +
     geom_violin(draw_quantiles = c(0.5), fill = NA) +
     scale_color_manual(values = cbPalette) +
     ylab("Upper 75th quantile\n of distance traveled") +
@@ -158,3 +211,28 @@ dist_u75plot <- ggplot(data = distT, aes(x = Period2, y = u75)) +
 dist_u75plot
 ggsave("dist_u75plot.pdf", dist_u75plot, width = 6, height = 4)    
 
+
+u75lmer <- rbind(
+    u75lmerAbsCI,
+    u75lmerRelCI,
+    u75lmerACCCI,
+    u75lmerDistCI
+    )
+
+
+u75lmer$Parameter <- factor(u75lmer$Parameter)
+
+
+ggAllLmer <- ggplot(u75lmer, aes(x = Parameter, y = Coefficient, ymin = l95, ymax = u95)) +
+    geom_point()+
+    geom_hline(yintercept = 0, color = 'red') + 
+    coord_flip() +
+    facet_grid( Endpoint ~ . ) +
+    geom_linerange() +
+    theme_bw() +
+    theme(strip.background = element_blank()) 
+    
+
+print(ggAllLmer)
+ggsave("ggAllLmer.pdf", width = 6, height = 6)
+ggsave("ggAllLmer.jpg", width = 6, height = 6)

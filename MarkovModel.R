@@ -36,7 +36,6 @@ trialLocation[ , grid := paste( x.zone, y.zone, sep = "-")]
 
 
 ## create transition table
-
 positions <- trialLocation[ , .(first.positions = grid,
                                 second.positions = lead(grid, 1)
                                 ),
@@ -133,7 +132,7 @@ plotAll <- rbind(tagSummary,
                  empericalFish)
 
 
-firstOrderMarkovOutWithData <- ggplot( ) +
+firstOrderMarkovWithData <- ggplot( ) +
     geom_raster(data = plotAll, aes(x = x, y = y, fill = prob)) +
     facet_grid( species + Type ~ period) +
     xlab("x cell") +
@@ -144,31 +143,50 @@ firstOrderMarkovOutWithData <- ggplot( ) +
     geom_path( data = wallLocation, aes(x = x, y = y), size = 3, color = "white") +
     geom_line( data = barrierLocation, aes(x = x, y = y), size = 5, color = "orange") 
 
-print(firstOrderMarkovOutWithData)
-ggsave(plot = firstOrderMarkovOutWithData, file = "firstOrderMarkovWithData.pdf", width = 9, height = 6)
-ggsave(plot = firstOrderMarkovOutWithData, file = "firstOrderMarkovWithData.jpg", width = 9, height = 6)
+print(firstOrderMarkovWithData)
+ggsave(plot = firstOrderMarkovWithData, file = "firstOrderMarkovWithData.pdf", width = 9, height = 6)
+ggsave(plot = firstOrderMarkovWithData, file = "firstOrderMarkovWithData.jpg", width = 9, height = 6)
 
 
 ## Examine mean prob as fish stays in the same cell
 ## Note this would be the equivalent of examining the mean of the diag, if in vector form 
-diagMean <- firstOrder[ first.positions == second.positions, .(meanNoMove = mean(prob)),
+firstOrder[ , Ntct := sum(N), by = .(TagCodeTrial, Period2, Species, Trial)]
+firstOrder[ , Ptct := N/Ntct]
+firstOrder[ , sum(Ptct), by = .(TagCodeTrial, Period2, Species, Trial)]
+diagMean <- firstOrder[ first.positions == second.positions,
+                       .(meanWeigthed = mean(prob * Ptct),
+                         meanNoMove = mean(prob)),
                       by = .(TagCodeTrial, Period2, Species, Trial)] 
 
-ggSameCell <- ggplot(diagMean, aes(x = Period2,  y = meanNoMove)) +
+ggSameCell <- ggplot(diagMean, aes(x = Period2,  y = meanWeigthed)) +
     ## geom_boxplot() +
     geom_point() + 
     theme_bw() +
     ylab("Probability of staying in same cell")  +
     xlab("Time period") +
-    ylim(c(0,1)) +
+    ## ylim(c(0,1)) +
     geom_violin(draw_quantiles = 0.5, fill = NA)
 
 print(ggSameCell)
 ggsave("sameCell.pdf", ggSameCell, width = 6, height = 4)
 ggsave("sameCell.jpg", ggSameCell, width = 6, height = 4)
 
-diaMeanLmer <- diagMean[ , lmer( meanNoMove ~ Period2 + Species + (1 | Trial)) ] 
+diaMeanLmer <- diagMean[ , lmer( meanWeigthed ~ Period2 + Species + (1 | Trial)) ] 
 summary(diaMeanLmer)
 
-cbind(fixef(diaMeanLmer), confint(diaMeanLmer)[ -c(1:2),])
+diaMeanLmerCI <- data.frame(cbind(fixef(diaMeanLmer), confint(diaMeanLmer)[ -c(1:2),]))
+diaMeanLmerCI$Parameter <- gsub("Period2|\\(|\\)", "", rownames(diaMeanLmerCI))
+colnames(diaMeanLmerCI)[1:3] <- c("Coefficient", "L95", "U95")
 
+ggDiaMean <- ggplot(diaMeanLmerCI, aes(x = Parameter, y = Coefficient, ymin = L95,
+                          ymax = U95)) +
+    geom_point() +
+    geom_linerange() +
+    theme_bw() +
+    coord_flip()+
+    geom_hline(yintercept = 0, color = "red")
+print(ggDiaMean)
+
+
+ggsave("ggDiaMean.pdf", ggDiaMean, width = 4, height = 4)
+ggsave("ggDiaMean.jpg", ggDiaMean, width = 4, height = 4)

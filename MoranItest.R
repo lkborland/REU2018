@@ -29,7 +29,7 @@ accOut <- foreach( i = 1:nrow(tagTrialList),
                                   firstOrder = firstOrder, allCells = allCells)
                   }
 
-MoranIacc <- ggplot(accOut, aes(x = Period, y = observed)) +
+MoranIacc <- ggplot(accOut, aes(x = Period, y = observed )) +
     geom_violin(draw_quantiles = 0.5) + 
     geom_point() +
     theme_bw() +
@@ -40,7 +40,7 @@ print(MoranIacc)
 ggsave(file = "MoranI_acc.pdf", MoranIacc, width = 6, height = 4)
 
 head(accOut)
-accLmer <- lmer(observed ~ Period + (1| TagCodeTrial), data = accOut)
+accLmer <- lmer(observed ~ Period + Species + (1| TagCodeTrial), data = accOut)
 summary(accLmer)
 
 accConfInt <- data.frame(cbind(fixef(accLmer),
@@ -85,7 +85,7 @@ print(MoranIvel)
 ggsave(file = "MoranI_vel.pdf", MoranIvel, width = 6, height = 4)
 
 
-velLmer <- lmer(observed ~ Period + (1| TagCodeTrial), data = velOut)
+velLmer <- lmer(observed ~ Period + Species + (1| TagCodeTrial), data = velOut)
 summary(velLmer)
 
 velConfInt <- data.frame(cbind(fixef(velLmer),
@@ -121,7 +121,7 @@ ggsave(file = "MoranI_dist.pdf", MoranIdist, width = 6, height = 4)
 
 
 head(distOut)
-distLmer <- lmer(observed ~ Period + (1| TagCodeTrial), data = distOut)
+distLmer <- lmer(observed ~ Period + Species+ (1| TagCodeTrial), data = distOut)
 
 summary(distLmer)
 
@@ -151,7 +151,7 @@ ggsave(file = "MoranI_rel.angle.pdf", MoranIrel.angle, width = 6, height = 4)
 
 
 head(rel.angleOut)
-relLmer <- lmer(observed ~ Period + (1| TagCodeTrial), data = rel.angleOut)
+relLmer <- lmer(observed ~ Period + Species + (1| TagCodeTrial), data = rel.angleOut)
 
 summary(relLmer)
 
@@ -183,7 +183,7 @@ ggsave(file = "MoranI_abs.angle.pdf", MoranIabs.angle, width = 6, height = 4)
 
 
 head(abs.angleOut)
-absLmer <- lmer(observed ~ Period + (1| TagCodeTrial), data = abs.angleOut)
+absLmer <- lmer(observed ~ Period + Species  +(1| TagCodeTrial), data = abs.angleOut)
 summary(absLmer)
 
 absAngleConfInt <- data.frame(cbind(fixef(absLmer),
@@ -245,6 +245,8 @@ head(allConfInt)
 allConfInt$Coefficient <- gsub("(\\))\\d$", "\\1", rownames(allConfInt))
 allConfInt$Coefficient <- gsub("(2)\\d$", "\\1",   allConfInt$Coefficient)
 allConfInt$Coefficient <- gsub("\\(|\\)|Period", "", allConfInt$Coefficient)
+allConfInt$Coefficient <- gsub("SVC\\d$", "SVC", allConfInt$Coefficient)
+
 head(allConfInt)
 
 colnames(allConfInt)[1:3] <- c("Estimate", "L95", "U95")
@@ -256,8 +258,7 @@ rownames(allConfInt) <- 1:nrow(allConfInt)
 allConfInt$Coefficient <- factor( allConfInt$Coefficient,
                                  levels = rev(unique(allConfInt$Coefficient)))
 
-
-ggplot(allConfInt, aes(x = Coefficient, y= Estimate, ymin = L95, ymax = U95)) +
+MoranICoef <- ggplot(allConfInt, aes(x = Coefficient, y= Estimate, ymin = L95, ymax = U95)) +
     geom_point() +
     geom_linerange() +
     facet_grid(EndPoint~ . ) +
@@ -268,8 +269,9 @@ ggplot(allConfInt, aes(x = Coefficient, y= Estimate, ymin = L95, ymax = U95)) +
         strip.background = element_blank()
         ) +
     ylab("Regression estimate for Moran's I") 
+print(MoranICoef)
 
-
+ggsave("MoranICoef.pdf", MoranICoef, width = 4, height = 8)
                          
 sink("sessionInfo.txt")
 print(sessionInfo())

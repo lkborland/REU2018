@@ -49,7 +49,8 @@ accFunction <- function(index, tagTrialList, accelerationByCell,
     
     out <- as.data.frame(ape::Moran.I(acUse[ , acc], firstOrderMatrix))
     out$TagCodeTrial <- tagTrialList[ index , TagCodeTrial]
-    out$Period <-  tagTrialList[ index, Period2]   
+    out$Period <-  tagTrialList[ index, Period2]
+    out$Species <-  tagTrialList[ index, Species]   
     return(out)
 }
 
@@ -105,6 +106,7 @@ firstFunction <- function(index, tagTrialList,
     out <- as.data.frame(ape::Moran.I(acUse[ , eval(as.symbol(varUse)) ], 
                                       firstOrderMatrix))
     out$TagCodeTrial <- tagTrialList[ index , TagCodeTrial]
-    out$Period <-  tagTrialList[ index, Period2]   
+    out$Period <-  tagTrialList[ index, Period2]
+    out$Species <-  tagTrialList[ index, Species]   
     return(out)
 }
