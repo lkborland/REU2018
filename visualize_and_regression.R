@@ -231,8 +231,19 @@ u75lmer$Parameter <- factor(u75lmer$Parameter,
                                       "IncreasingCO2",
                                       "DuringCO2",
                                       "DecreasingCO2",
-                                      "PostCO2")))
+                                      "PostCO2")),
+                            labels =
+                                rev(c("Intercept",
+                                      "Silver carp",
+                                      "Increasing CO2",
+                                      "During CO2",
+                                      "Decreasing CO2",
+                                      "Post CO2")),
+                            )
 
+print(u75lmer[ grepl("Abs", u75lmer$Endpoint), ], digits = 2)
+print(u75lmer[ grepl("Rel", u75lmer$Endpoint), ], digits = 2)
+print(u75lmer[ grepl("Dist", u75lmer$Endpoint), ], digits = 2)
 
 ggAllLmer <- ggplot(u75lmer, aes(x = Parameter, y = Coefficient, ymin = l95, ymax = u95)) +
     geom_point()+

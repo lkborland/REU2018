@@ -1,9 +1,10 @@
 ## Load source file to load required packages and
 ## format data
-source("MarkovModel.R")
 library(ape)
 library(dplyr)
-
+library(lmerTest)
+library(tidyverse)
+source("MarkovModel.R")
 
 ## Analyze acceleration by cell
 acceleration <- fread("acceleration.csv")
@@ -204,11 +205,60 @@ rel.angleOut$EndPoint <- "Relative angle"
 head(abs.angleOut)
 abs.angleOut$EndPoint <- "Absolute angle"
 
-allEndPoints <- rbind(velOut,
-                      accOut,
-                      distOut,
-                      rel.angleOut,
-                      abs.angleOut)
+allEndPoints <- data.table(rbind(velOut,
+                                 accOut,
+                                 distOut,
+                                 rel.angleOut,
+                                 abs.angleOut))
+head(velOut)
+
+meansAndCI <- 
+    rbind(
+        cbind(broom::tidy(lm(observed ~ Period - 1,
+                             data = data.table(abs.angleOut)[ grep("BHC", Species), ]),
+                          conf.int = TRUE), species = "BHC", endPoint = "Absolute angle"),
+        cbind(broom::tidy(lm(observed ~ Period - 1,
+                             data = data.table(abs.angleOut)[ grep("SVC", Species), ]),
+                          conf.int = TRUE), species = "SVC", endPoint = "Absolute angle"),
+        cbind(broom::tidy(lm(observed ~ Period - 1,
+                             data = data.table(accOut)[ grep("BHC", Species), ]),
+                          conf.int = TRUE), species = "BHC", endPoint = "Acceleration"),
+        cbind(broom::tidy(lm(observed ~ Period - 1,
+                             data = data.table(accOut)[ grep("SVC", Species), ]),
+                          conf.int = TRUE), species = "SVC", endPoint = "Acceleration"),
+        cbind(broom::tidy(lm(observed ~ Period - 1,
+                             data = data.table(distOut)[ grep("BHC", Species), ]),
+                          conf.int = TRUE), species = "BHC", endPoint = "Distance"),
+        cbind(broom::tidy(lm(observed ~ Period - 1,
+                             data = data.table(distOut)[ grep("SVC", Species), ]),
+                          conf.int = TRUE), species = "SVC", endPoint = "Distance"),
+        cbind(broom::tidy(lm(observed ~ Period - 1,
+                             data = data.table(rel.angleOut)[ grep("BHC", Species), ]),
+                          conf.int = TRUE), species = "BHC", endPoint = "Relative angle"),
+        cbind(broom::tidy(lm(observed ~ Period - 1,
+                             data = data.table(rel.angleOut)[ grep("SVC", Species), ]),
+                          conf.int = TRUE), species = "SVC", endPoint = "Relative angle"),
+        cbind(broom::tidy(lm(observed ~ Period - 1,
+                             data = data.table(velOut)[ grep("BHC", Species), ]),
+                          conf.int = TRUE), species = "BHC", endPoint = "Velocity"),
+        cbind(broom::tidy(lm(observed ~ Period - 1,
+                             data = data.table(velOut)[ grep("SVC", Species), ]),
+                          conf.int = TRUE), species = "SVC", endPoint =  "Velocity")
+    ) %>%
+    select(endPoint, species, term, estimate, conf.low, conf.high)
+
+
+meansAndCI %>% mutate(term = gsub("Period", "", term),
+                      speices = factor()
+
+
+allEndPoints[ , species_plot := factor(Species,
+                                       levels = c("BHC", "SVC"),
+                                       labels = c("Bighead carp",
+                                                  "Silver carp")
+                                       )]
+
+allEndPoints[ , mean(observed), by = .(EndPoint, Period, Species)]
 
 
 
@@ -218,7 +268,7 @@ MoranIall <-
     geom_point() +
     theme_bw() +
     geom_hline(aes(yintercept = expected), color = 'red', size = 2) +
-    facet_grid( EndPoint ~ . ) + 
+    facet_grid( EndPoint ~ species_plot ) + 
     ylab("Observed Moran's I") +
     xlab("Trial Period") +
     theme(
@@ -226,7 +276,8 @@ MoranIall <-
     ) 
 print(MoranIall) 
 
-ggsave(file = "MoranI_all.pdf", MoranIall, width = 6, height = 8)
+ggsave(file = "MoranI_all.pdf", MoranIall, width = 10, height = 8)
+ggsave(file = "MoranI_all.jpg", MoranIall, width = 10, height = 8)
 
 accConfInt$EndPoint <- "Acceleration"
 velConfInt$EndPoint <-  "Velocity"

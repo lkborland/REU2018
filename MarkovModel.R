@@ -135,10 +135,15 @@ empericalFish[ , sum(prob), by = .(period, species)]
 plotAll <- rbind(tagSummary,
                  empericalFish)
 
-
+plotAll[ , species_plot := factor(species,
+                                  levels = c("BHC", "SVC"),
+                                  labels = c("Bighead carp",
+                                             "Silver carp")
+                                  )]
+                                  
 firstOrderMarkovWithData <- ggplot( ) +
     geom_raster(data = plotAll, aes(x = x, y = y, fill = prob)) +
-    facet_grid( species + Type ~ period) +
+    facet_grid( species_plot + Type ~ period) +
     xlab("x cell") +
     ylab("y cell") +
     theme_bw() +
@@ -148,6 +153,7 @@ firstOrderMarkovWithData <- ggplot( ) +
     geom_line( data = barrierLocation, aes(x = x, y = y), size = 5, color = "orange") 
 
 print(firstOrderMarkovWithData)
+
 ggsave(plot = firstOrderMarkovWithData, file = "firstOrderMarkovWithData.pdf", width = 9, height = 6)
 ggsave(plot = firstOrderMarkovWithData, file = "firstOrderMarkovWithData.jpg", width = 9, height = 6)
 
@@ -162,18 +168,31 @@ diagMean <- firstOrder[ first.positions == second.positions,
                          meanNoMove = mean(prob)),
                       by = .(TagCodeTrial, Period2, Species, Trial)] 
 
-ggSameCell <- ggplot(diagMean, aes(x = Period2,  y = meanWeigthed)) +
-    ## geom_boxplot() +
+diagMean[ , mean(meanNoMove), by = Period2]
+
+broom::tidy(lm(meanNoMove ~  Period2 - 1, data = diagMean), conf.int = TRUE)
+
+diagMean[ , species_plot := factor(Species,
+                                   levels = c("BHC", "SVC"),
+                                   labels = c("Bighead carp",
+                                              "Silver carp")
+                                   )]
+
+
+ggSameCell <-
+    ggplot(diagMean, aes(x = Period2,  y = meanWeigthed)) +
     geom_point() + 
     theme_bw() +
+    theme(strip.background = element_blank()) + 
+    facet_grid( . ~ species_plot) +
     ylab("Probability of staying in same cell")  +
     xlab("Time period") +
     ## ylim(c(0,1)) +
     geom_violin(draw_quantiles = 0.5, fill = NA)
 
 print(ggSameCell)
-ggsave("sameCell.pdf", ggSameCell, width = 6, height = 4)
-ggsave("sameCell.jpg", ggSameCell, width = 6, height = 4)
+ggsave("sameCell.pdf", ggSameCell, width = 10, height = 4)
+ggsave("sameCell.jpg", ggSameCell, width = 10, height = 4)
 
 diaMeanLmer <- diagMean[ , lmer( meanWeigthed ~ Period2 + Species + (1 | Trial)) ] 
 summary(diaMeanLmer)
@@ -189,7 +208,17 @@ diaMeanLmerCI$Parameter <- factor(diaMeanLmerCI$Parameter,
                                             "IncreasingCO2",
                                             "DuringCO2",
                                             "DecreasingCO2",
-                                            "PostCO2")))
+                                            "PostCO2")),
+                                  labels =
+                                      rev(c("Intercept",
+                                            "Silver carp",
+                                            "Increasing CO2",
+                                            "During CO2",
+                                            "Decreasing CO2",
+                                            "Post CO2")),
+                                  )
+
+
 
 ggDiaMean <- ggplot(diaMeanLmerCI, aes(x = Parameter, y = Coefficient, ymin = L95,
                           ymax = U95)) +
