@@ -34,6 +34,10 @@ trialLocation[ , x.zone  := findInterval( x, easting.boundaries)]
 trialLocation[ , y.zone  := findInterval( y, northing.boundaries)]
 trialLocation[ , grid := paste( x.zone, y.zone, sep = "-")]
 
+trialLocation[ , .N, by = .(TagCodeTrial, grid)][ , quantile(N, 0.01)]
+trialLocation[ , .N, by = .(TagCodeTrial, grid)][ , mean(N)]
+trialLocation[ , .N, by = .(TagCodeTrial, grid)][ , median(N)]
+trialLocation[ , .N, by = .(TagCodeTrial, grid)][ , min(N)]
 
 ## create transition table
 positions <- trialLocation[ , .(first.positions = grid,
@@ -177,6 +181,15 @@ summary(diaMeanLmer)
 diaMeanLmerCI <- data.frame(cbind(fixef(diaMeanLmer), confint(diaMeanLmer)[ -c(1:2),]))
 diaMeanLmerCI$Parameter <- gsub("Period2|\\(|\\)", "", rownames(diaMeanLmerCI))
 colnames(diaMeanLmerCI)[1:3] <- c("Coefficient", "L95", "U95")
+
+diaMeanLmerCI$Parameter <- factor(diaMeanLmerCI$Parameter,
+                                  levels =
+                                      rev(c("Intercept",
+                                            "SpeciesSVC",
+                                            "IncreasingCO2",
+                                            "DuringCO2",
+                                            "DecreasingCO2",
+                                            "PostCO2")))
 
 ggDiaMean <- ggplot(diaMeanLmerCI, aes(x = Parameter, y = Coefficient, ymin = L95,
                           ymax = U95)) +

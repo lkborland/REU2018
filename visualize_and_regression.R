@@ -154,14 +154,15 @@ u75lmerAbsCI
 u75lmerRelCI
 u75lmerACCCI
 
-ACC_u75plot <- ggplot(data = acc, aes(x = Period2, y = u75, color = Species)) +
+ACC_u75plot <-
+    ggplot(data = acc, aes(x = Period2, y = u75, color = Species)) +
     geom_violin(draw_quantiles = c(0.5), fill = NA) +
     scale_color_manual(values = cbPalette) +
     ylab("Upper 75th quantile\n of acceleration") +
     xlab(expression("Period of CO"[2]*" treatment")) +
     theme_bw() 
-acc_u75plot
-ggsave("acc_u75plot.pdf", acc_u75plot, width = 6, height = 4)    
+ACC_u75plot
+ggsave("acc_u75plot.pdf", ACC_u75plot, width = 6, height = 4)    
 
 
 ## look at distance traveled 
@@ -221,6 +222,16 @@ u75lmer <- rbind(
 
 
 u75lmer$Parameter <- factor(u75lmer$Parameter)
+
+
+u75lmer$Parameter <- factor(u75lmer$Parameter,
+                            levels =
+                                rev(c("Intercept",
+                                      "SpeciesSVC",
+                                      "IncreasingCO2",
+                                      "DuringCO2",
+                                      "DecreasingCO2",
+                                      "PostCO2")))
 
 
 ggAllLmer <- ggplot(u75lmer, aes(x = Parameter, y = Coefficient, ymin = l95, ymax = u95)) +

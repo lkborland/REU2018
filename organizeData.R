@@ -12,7 +12,7 @@ trial2 <- fread("trial2data.csv")
 trial3 <- fread("trial3data.csv")
 
 trial <- rbind(trial1, trial2, trial3)
-
+trial
 ## Create uniuqe tag code for each fish
 
 trial[ , TagCodeTrial := paste(TagCode, Trial, sep = "-")]
