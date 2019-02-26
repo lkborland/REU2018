@@ -148,7 +148,7 @@ firstOrderMarkovWithData <- ggplot( ) +
     ylab("y cell") +
     theme_bw() +
     theme(strip.background = element_blank()) + 
-    scale_fill_continuous("Occurance\nProbability") +
+    scale_fill_continuous("Occurrence\nProbability") +
     geom_path( data = wallLocation, aes(x = x, y = y), size = 3, color = "white") +
     geom_line( data = barrierLocation, aes(x = x, y = y), size = 5, color = "orange") 
 
