@@ -23,15 +23,18 @@ setkey(allCells, xCell, yCell)
 source("MoranIfunctions.R")
 registerDoParallel(cores = 4)
 
-accOut <- foreach( i = 1:nrow(tagTrialList),
-                  .combine = 'rbind') %dopar% {
-                      accFunction(index = i, tagTrialList = tagTrialList,
-                                  accelerationByCell = accelerationByCell,
-                                  firstOrder = firstOrder, allCells = allCells)
-                  }
+accOut <-
+    foreach( i = 1:nrow(tagTrialList),
+            .combine = 'rbind',
+            .packages = c("data.table", "ape")) %dopar% {
+                accFunction(index = i, tagTrialList = tagTrialList,
+                            accelerationByCell = accelerationByCell,
+                            firstOrder = firstOrder, allCells = allCells)
+            }
 
-MoranIacc <- ggplot(accOut, aes(x = Period, y = observed )) +
-    geom_violin(draw_quantiles = 0.5) + 
+MoranIacc <-
+    ggplot(accOut, aes(x = Period, y = observed )) +
+    geom_violin(draw_quantiles = 0.5) +
     geom_point() +
     theme_bw() +
     geom_hline(aes(yintercept = expected), color = 'red', size = 2) +
@@ -68,7 +71,8 @@ setkey(allCells, xCell, yCell)
 registerDoParallel(cores = 4)
 
 velOut <- foreach( i = 1:nrow(tagTrialList),
-                  .combine = 'rbind') %dopar% {
+                  .combine = 'rbind',
+                  .packages = c("data.table", "ape")) %dopar% {
                       accFunction(index = i, tagTrialList = tagTrialList,
                                   accelerationByCell = velocityByCell,
                                   firstOrder = firstOrder, allCells = allCells)
@@ -76,7 +80,7 @@ velOut <- foreach( i = 1:nrow(tagTrialList),
 
 
 MoranIvel <- ggplot(velOut, aes(x = Period, y = observed)) +
-    geom_violin(draw_quantiles = 0.5) + 
+    geom_violin(draw_quantiles = 0.5) +
     geom_point() +
     theme_bw() +
     geom_hline(aes(yintercept = expected), color = 'red', size = 2) +
@@ -102,7 +106,8 @@ trialCellAve <- trialLocation[ , .(abs.angle = mean(abs.angle, na.rm = TRUE),
 
 ## Examine distance
 distOut <- foreach( i = 1:nrow(tagTrialList),
-                  .combine = 'rbind') %dopar% {
+                   .combine = 'rbind',
+                   .packages = c("data.table", "ape")) %dopar% {
                       firstFunction(index = i, tagTrialList = tagTrialList,
                                     trialCellAve = trialCellAve,
                                     firstOrder = firstOrder, allCells = allCells,
@@ -111,14 +116,14 @@ distOut <- foreach( i = 1:nrow(tagTrialList),
 
 
 MoranIvel <- ggplot(distOut, aes(x = Period, y = observed)) +
-    geom_violin(draw_quantiles = 0.5) + 
+    geom_violin(draw_quantiles = 0.5) +
     geom_point() +
     theme_bw() +
     geom_hline(aes(yintercept = expected), color = 'red', size = 2) +
     ylab("Observed Moran's I") +
     xlab("Trial Period")
 print(MoranIvel)
-ggsave(file = "MoranI_dist.pdf", MoranIdist, width = 6, height = 4)
+ggsave(file = "MoranI_Ivel.pdf", MoranIvel, width = 6, height = 4)
 
 
 head(distOut)
@@ -132,23 +137,24 @@ distConfInt <- data.frame(cbind(fixef(distLmer),
 
 ## Examine relative angle
 rel.angleOut <- foreach( i = 1:nrow(tagTrialList),
-                  .combine = 'rbind') %dopar% {
-                      firstFunction(index = i, tagTrialList = tagTrialList,
-                                    trialCellAve = trialCellAve,
-                                    firstOrder = firstOrder, allCells = allCells,
-                                    varUse = "rel.angle")
-                  }
+                        .combine = 'rbind',
+                        .packages = c("data.table", "ape")) %dopar% {
+                            firstFunction(index = i, tagTrialList = tagTrialList,
+                                          trialCellAve = trialCellAve,
+                                          firstOrder = firstOrder, allCells = allCells,
+                                          varUse = "rel.angle")
+                        }
 
 
 MoranIvel <- ggplot(rel.angleOut, aes(x = Period, y = observed)) +
-    geom_violin(draw_quantiles = 0.5) + 
+    geom_violin(draw_quantiles = 0.5) +
     geom_point() +
     theme_bw() +
     geom_hline(aes(yintercept = expected), color = 'red', size = 2) +
     ylab("Observed Moran's I") +
     xlab("Trial Period")
 print(MoranIvel)
-ggsave(file = "MoranI_rel.angle.pdf", MoranIrel.angle, width = 6, height = 4)
+ggsave(file = "MoranI_Ivel.pdf", MoranIvel, width = 6, height = 4)
 
 
 head(rel.angleOut)
@@ -164,16 +170,17 @@ relAngleConfInt <- data.frame(
 
 ## Examine abs angle
 abs.angleOut <- foreach( i = 1:nrow(tagTrialList),
-                  .combine = 'rbind') %dopar% {
-                      firstFunction(index = i, tagTrialList = tagTrialList,
-                                    trialCellAve = trialCellAve,
-                                    firstOrder = firstOrder, allCells = allCells,
-                                    varUse = "abs.angle")
-                  }
+                        .combine = 'rbind',
+                        .packages = c("data.table", "ape")) %dopar% {
+                            firstFunction(index = i, tagTrialList = tagTrialList,
+                                          trialCellAve = trialCellAve,
+                                          firstOrder = firstOrder, allCells = allCells,
+                                          varUse = "abs.angle")
+                        }
 
 
 MoranIvel <- ggplot(abs.angleOut, aes(x = Period, y = observed)) +
-    geom_violin(draw_quantiles = 0.5) + 
+    geom_violin(draw_quantiles = 0.5) +
     geom_point() +
     theme_bw() +
     geom_hline(aes(yintercept = expected), color = 'red', size = 2) +
@@ -212,7 +219,7 @@ allEndPoints <- data.table(rbind(velOut,
                                  abs.angleOut))
 head(velOut)
 
-meansAndCI <- 
+meansAndCI <-
     rbind(
         cbind(broom::tidy(lm(observed ~ Period - 1,
                              data = data.table(abs.angleOut)[ grep("BHC", Species), ]),
@@ -250,6 +257,9 @@ meansAndCI <-
 
 meansAndCI %>% mutate(term = gsub("Period", "", term),
                       speices = factor()
+                      )
+
+meansAndCI <- data.table(meansAndCI)
 
 
 allEndPoints[ , species_plot := factor(Species,
@@ -262,19 +272,28 @@ allEndPoints[ , mean(observed), by = .(EndPoint, Period, Species)]
 
 
 
+allEndPoints[ , EndPoint := factor(EndPoint,
+                                   levels = c(
+                                       "Acceleration",
+                                       "Velocity",
+                                       "Distance",
+                                       "Relative angle",
+                                       "Absolute angle")
+                                   )]
+
 MoranIall <-
     ggplot(allEndPoints, aes(x = Period, y = observed)) +
     geom_violin(draw_quantiles = 0.5) +
     geom_point() +
     theme_bw() +
     geom_hline(aes(yintercept = expected), color = 'red', size = 2) +
-    facet_grid( EndPoint ~ species_plot ) + 
+    facet_grid( EndPoint ~ species_plot ) +
     ylab("Observed Moran's I") +
     xlab("Trial Period") +
     theme(
         strip.background = element_blank()
-    ) 
-print(MoranIall) 
+    )
+print(MoranIall)
 
 ggsave(file = "MoranI_all.pdf", MoranIall, width = 10, height = 8)
 ggsave(file = "MoranI_all.jpg", MoranIall, width = 10, height = 8)
@@ -309,6 +328,8 @@ rownames(allConfInt) <- 1:nrow(allConfInt)
 allConfInt$Coefficient <- factor( allConfInt$Coefficient,
                                  levels = rev(unique(allConfInt$Coefficient)))
 
+allConfInt <- data.table(allConfInt)
+
 MoranICoef <- ggplot(allConfInt, aes(x = Coefficient, y= Estimate, ymin = L95, ymax = U95)) +
     geom_point() +
     geom_linerange() +
@@ -319,11 +340,11 @@ MoranICoef <- ggplot(allConfInt, aes(x = Coefficient, y= Estimate, ymin = L95, y
         theme(
         strip.background = element_blank()
         ) +
-    ylab("Regression estimate for Moran's I") 
+    ylab("Regression estimate for Moran's I")
 print(MoranICoef)
 
 ggsave("MoranICoef.pdf", MoranICoef, width = 4, height = 8)
-                         
+
 sink("sessionInfo.txt")
 print(sessionInfo())
 sink()

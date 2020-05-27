@@ -27,7 +27,7 @@ northing.zones <- 10
 easting.boundaries  <- seq(0, easting.width,  length.out = easting.zones)
 northing.boundaries <- seq(0, northing.width, length.out = northing.zones)
 
-## Assign fish locations to grids 
+## Assign fish locations to grids
 trialLocation
 easting.boundaries
 trialLocation[ , x.zone  := findInterval( x, easting.boundaries)]
@@ -55,18 +55,18 @@ positions[ !is.na(second.positions),
 
 positions
 
-## create vectorized number of transitions 
+## create vectorized number of transitions
 firstOrder <- positions[ !is.na(second.positions),
                         .N,
                         by = .(TagCodeTrial, Period, Period2, Species, Trial,
-                               first.positions, second.positions, firstTransition)] 
+                               first.positions, second.positions, firstTransition)]
 
 ## Use above results to create transition probabilities (a vectorized Markov chain)
 firstOrder[ , prob :=  N / sum(N),
            by = .(TagCodeTrial, Period, Period2, Species, Trial,
                   first.positions)]
 
-## Sum to make sure all probs are 1, which is a Markovian property 
+## Sum to make sure all probs are 1, which is a Markovian property
 firstOrder[ , sum(prob),
            by = .(TagCodeTrial, Period, Period2, Species, Trial,
                   first.positions)]
@@ -78,16 +78,18 @@ tagTrialList <- firstOrder[ , .N, by = .(TagCodeTrial, Period2, Species)]
 tagTrialList[ , index := 1:nrow(tagTrialList)]
 
 
-firstOrderOut <- foreach(i = 1:nrow(tagTrialList),
-                         .combine = 'rbind') %dopar% {  
-                             firstOrderMC(
-                                 tag = tagTrialList[i, TagCodeTrial],
-                                 period = tagTrialList[i, Period2],
-                                 n.iter = 1000,
-                                 firstOrderDT = firstOrder,
-                                 species = tagTrialList[i, Species]
-                             )   
-                         }
+
+firstOrderOut <-
+    foreach(i = 1:nrow(tagTrialList),
+            .combine = 'rbind', .packages = c("data.table")) %dopar% {
+                firstOrderMC(
+                    tag = tagTrialList[i, TagCodeTrial],
+                    period = tagTrialList[i, Period2],
+                    n.iter = 1000,
+                    firstOrderDT = firstOrder,
+                    species = tagTrialList[i, Species]
+                )
+            }
 
 
 tagSummary <- firstOrderOut[ , .(N = sum(N)), by = .( period, fish.cell, x, y, species)]
@@ -102,17 +104,17 @@ barrierLocation <- data.frame(x = c(0.5, 2.6),
 wallLocation <- data.frame(x = c(2.5, 2.5, 0.5),
                           y = c(9.5, 4.5, 4.5 ))
 
-## Plot Markov output 
+## Plot Markov output
 firstOrderMarkovOut <- ggplot( ) +
     geom_raster(data = tagSummary, aes(x = x, y = y, fill = prob)) +
     facet_grid( species ~ period) +
     xlab("x cell") +
     ylab("y cell") +
     theme_bw() +
-    theme(strip.background = element_blank()) + 
+    theme(strip.background = element_blank()) +
     scale_fill_continuous("Probability") +
     geom_path( data = wallLocation, aes(x = x, y = y), size = 3, color = "white") +
-    geom_line( data = barrierLocation, aes(x = x, y = y), size = 5, color = "orange") 
+    geom_line( data = barrierLocation, aes(x = x, y = y), size = 5, color = "orange")
 print(firstOrderMarkovOut)
 ggsave(plot = firstOrderMarkovOut, file = "firstOrderMarkov.pdf", width = 9, height = 6)
 ggsave(plot = firstOrderMarkovOut, file = "firstOrderMarkov.jpg", width = 9, height = 6)
@@ -140,17 +142,17 @@ plotAll[ , species_plot := factor(species,
                                   labels = c("Bighead carp",
                                              "Silver carp")
                                   )]
-                                  
+
 firstOrderMarkovWithData <- ggplot( ) +
     geom_raster(data = plotAll, aes(x = x, y = y, fill = prob)) +
     facet_grid( species_plot + Type ~ period) +
     xlab("x cell") +
     ylab("y cell") +
     theme_bw() +
-    theme(strip.background = element_blank()) + 
+    theme(strip.background = element_blank()) +
     scale_fill_continuous("Occurrence\nProbability") +
     geom_path( data = wallLocation, aes(x = x, y = y), size = 3, color = "white") +
-    geom_line( data = barrierLocation, aes(x = x, y = y), size = 5, color = "orange") 
+    geom_line( data = barrierLocation, aes(x = x, y = y), size = 5, color = "orange")
 
 print(firstOrderMarkovWithData)
 
@@ -159,14 +161,14 @@ ggsave(plot = firstOrderMarkovWithData, file = "firstOrderMarkovWithData.jpg", w
 
 
 ## Examine mean prob as fish stays in the same cell
-## Note this would be the equivalent of examining the mean of the diag, if in vector form 
+## Note this would be the equivalent of examining the mean of the diag, if in vector form
 firstOrder[ , Ntct := sum(N), by = .(TagCodeTrial, Period2, Species, Trial)]
 firstOrder[ , Ptct := N/Ntct]
 firstOrder[ , sum(Ptct), by = .(TagCodeTrial, Period2, Species, Trial)]
 diagMean <- firstOrder[ first.positions == second.positions,
                        .(meanWeigthed = mean(prob * Ptct),
                          meanNoMove = mean(prob)),
-                      by = .(TagCodeTrial, Period2, Species, Trial)] 
+                      by = .(TagCodeTrial, Period2, Species, Trial)]
 
 diagMean[ , mean(meanNoMove), by = Period2]
 
@@ -181,9 +183,9 @@ diagMean[ , species_plot := factor(Species,
 
 ggSameCell <-
     ggplot(diagMean, aes(x = Period2,  y = meanWeigthed)) +
-    geom_point() + 
+    geom_point() +
     theme_bw() +
-    theme(strip.background = element_blank()) + 
+    theme(strip.background = element_blank()) +
     facet_grid( . ~ species_plot) +
     ylab("Probability of staying in same cell")  +
     xlab("Time period") +
@@ -194,7 +196,7 @@ print(ggSameCell)
 ggsave("sameCell.pdf", ggSameCell, width = 10, height = 4)
 ggsave("sameCell.jpg", ggSameCell, width = 10, height = 4)
 
-diaMeanLmer <- diagMean[ , lmer( meanWeigthed ~ Period2 + Species + (1 | Trial)) ] 
+diaMeanLmer <- diagMean[ , lmer( meanWeigthed ~ Period2 + Species + (1 | Trial)) ]
 summary(diaMeanLmer)
 
 diaMeanLmerCI <- data.frame(cbind(fixef(diaMeanLmer), confint(diaMeanLmer)[ -c(1:2),]))
