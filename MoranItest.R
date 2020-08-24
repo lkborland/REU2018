@@ -345,6 +345,7 @@ MoranICoef <- ggplot(allConfInt, aes(x = Coefficient, y= Estimate, ymin = L95, y
 print(MoranICoef)
 
 ggsave("MoranICoef.pdf", MoranICoef, width = 4, height = 8)
+ggsave("Figure_6.jpg", MoranICoef, width = 4, height = 8)
 
 sink("sessionInfo.txt")
 print(sessionInfo())
