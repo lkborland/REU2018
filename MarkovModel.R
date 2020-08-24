@@ -158,6 +158,8 @@ print(firstOrderMarkovWithData)
 
 ggsave(plot = firstOrderMarkovWithData, file = "firstOrderMarkovWithData.pdf", width = 9, height = 6)
 ggsave(plot = firstOrderMarkovWithData, file = "firstOrderMarkovWithData.jpg", width = 9, height = 6)
+ggsave(plot = firstOrderMarkovWithData, file = "firstOrderMarkovWithData.jpg", width = 9, height = 6)
+
 
 
 ## Examine mean prob as fish stays in the same cell
@@ -195,6 +197,7 @@ ggSameCell <-
 print(ggSameCell)
 ggsave("sameCell.pdf", ggSameCell, width = 10, height = 4)
 ggsave("sameCell.jpg", ggSameCell, width = 10, height = 4)
+ggsave("Figure_4.jpg", ggSameCell, width = 10, height = 4)
 
 diaMeanLmer <- diagMean[ , lmer( meanWeigthed ~ Period2 + Species + (1 | Trial)) ]
 summary(diaMeanLmer)

@@ -297,6 +297,7 @@ print(MoranIall)
 
 ggsave(file = "MoranI_all.pdf", MoranIall, width = 10, height = 8)
 ggsave(file = "MoranI_all.jpg", MoranIall, width = 10, height = 8)
+ggsave(file = "Figure_5.jpg", MoranIall, width = 10, height = 8)
 
 accConfInt$EndPoint <- "Acceleration"
 velConfInt$EndPoint <-  "Velocity"

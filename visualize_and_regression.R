@@ -52,6 +52,7 @@ colnames(u75lmerRelCI)[1:3] <- c("Coefficient", "l95", "u95")
 u75lmerRelCI$Endpoint <- "Relative angle"
 
 
+
 u75plotRel <- ggplot(data = rel.angle, aes(x = Period2, y = u75, color = Species)) +
     geom_violin(draw_quantiles = c(0.5), fill = NA) +
     scale_color_manual(values = cbPalette) +
@@ -179,7 +180,7 @@ distAllData <- ggplot(data = trialLocation, aes(x = Period2, y = dist, color = S
     scale_color_manual(values = cbPalette)
 distAllData
 ggsave('distAllData.jpg', distAllData, width = 6, height = 4)
-
+ggsave('Figure_1.jpg', distAllData, width = 6, height = 4)
 
 
 ## Create plot
@@ -257,6 +258,7 @@ ggAllLmer <- ggplot(u75lmer, aes(x = Parameter, y = Coefficient, ymin = l95, yma
 print(ggAllLmer)
 ggsave("ggAllLmer.pdf", width = 6, height = 6)
 ggsave("ggAllLmer.jpg", width = 6, height = 6)
+ggsave("Figure_2.jpg", width = 6, height = 6)
 
 ## Examine skewness
 distT_skew <- trialLocation[ ,
